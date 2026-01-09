@@ -1,6 +1,4 @@
 using CurrencyWatchdog.Configuration;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Plugin.Services;
 using KamiToolKit.Extensions;
 using KamiToolKit.Overlay;
 using System;

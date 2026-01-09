@@ -19,8 +19,7 @@ public sealed class ZoneWatcher : IDisposable {
         Service.Condition.ConditionChange -= OnConditionChange;
     }
 
-    private bool IsZoning() => Service.Condition[ConditionFlag.BetweenAreas];
-
+    private static bool IsZoning() => Service.Condition[ConditionFlag.BetweenAreas];
 
     private void OnLogin() {
         Notify(ChangeType.Login);
