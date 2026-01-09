@@ -1,4 +1,5 @@
 using CurrencyWatchdog.Configuration;
+using Dalamud.Game.ClientState.Conditions;
 using KamiToolKit.Classes;
 using KamiToolKit.Overlay;
 using System.Collections.Generic;
@@ -13,28 +14,15 @@ public sealed class ContainerNode : OverlayNode {
 
     private int visibleChildren;
 
-    public bool ForceHide {
-        get;
-        set {
-            if (field != value) {
-                field = value;
-                UpdateVisibility();
-            }
-        }
-    } = false;
-
-
     public ContainerNode() {
         Position = new Vector2(400, 200);
         Size = new Vector2(20, 20);
     }
 
     protected override void OnUpdate() {
-        // Do nothing
-    }
+        var forceHide = Plugin.Config.OverlayConfig.HideInDuty && Service.Condition[ConditionFlag.BoundByDuty56];
 
-    private void UpdateVisibility() {
-        if (ForceHide || visibleChildren == 0) {
+        if (forceHide || visibleChildren == 0) {
             IsVisible = false;
         } else {
             IsVisible = true;
@@ -49,8 +37,6 @@ public sealed class ContainerNode : OverlayNode {
             Children[i].IsVisible = false;
 
         visibleChildren = count;
-
-        UpdateVisibility();
     }
 
     private void CreateChild() {

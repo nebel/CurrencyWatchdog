@@ -23,26 +23,11 @@ public sealed class Overlay : IDisposable {
         container = new ContainerNode();
 
         overlayController.AddNode(container);
-
-        Service.Framework.Update += OnFrameworkUpdate;
     }
 
     public void Dispose() {
-        Service.Framework.Update -= OnFrameworkUpdate;
-
         container?.Dispose();
         overlayController?.Dispose();
-    }
-
-    private void OnFrameworkUpdate(IFramework framework) {
-        UpdateVisibility();
-    }
-
-    private void UpdateVisibility() {
-        if (Plugin.Config.OverlayConfig.HideInDuty && Service.Condition[ConditionFlag.Jumping])
-            container?.ForceHide = true;
-        else
-            container?.ForceHide = false;
     }
 
     public void UpdateConfig(Config config) {
@@ -52,7 +37,6 @@ public sealed class Overlay : IDisposable {
             return;
         }
 
-        UpdateVisibility();
         container.Configure(config.OverlayConfig);
     }
 
