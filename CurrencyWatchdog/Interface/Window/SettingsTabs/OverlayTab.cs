@@ -72,6 +72,53 @@ public class OverlayTab {
         }
         ImGuiComponents.HelpMarker("Adjusting Icon Size and Label Font Size may give better results than changing the scale");
 
+        ImGuiEx.ConfigHeader("Quantity Font Settings");
+
+        var quantityFontSize = (int)overlay.QuantityFontSize;
+        if (ImGui.SliderInt("Quantity Font Size", ref quantityFontSize, 6, 72)) {
+            overlay.QuantityFontSize = (uint)Math.Clamp(quantityFontSize, 3, 200);
+            changed = true;
+        }
+
+        var quantityFont = overlay.QuantityFont;
+        if (ImGuiEx.EnumCombo("Quantity Font", ref quantityFont)) {
+            overlay.QuantityFont = quantityFont;
+            changed = true;
+        }
+        ImGuiComponents.HelpMarker("Letters and special characters may not display in some fonts.");
+
+        var quantityFontOutline = overlay.QuantityFontOutline;
+        if (ImGuiEx.EnumCombo("Quantity Font Outline", ref quantityFontOutline)) {
+            overlay.QuantityFontOutline = quantityFontOutline;
+            changed = true;
+        }
+
+        var quantityNodeOffset = overlay.QuantityNodeOffset;
+        if (ImGui.DragFloat2("Quantity Text Offset X/Y", ref quantityNodeOffset, 1, -200, 200, flags: ImGuiSliderFlags.AlwaysClamp)) {
+            overlay.QuantityNodeOffset = quantityNodeOffset;
+            changed = true;
+        }
+
+        ImGuiEx.ConfigHeader("Label Font Settings");
+
+        var labelFontSize = (int)overlay.LabelFontSize;
+        if (ImGui.SliderInt("Label Font Size", ref labelFontSize, 6, 72)) {
+            overlay.LabelFontSize = (uint)Math.Clamp(labelFontSize, 3, 200);
+            changed = true;
+        }
+
+        var labelFont = overlay.LabelFont;
+        if (ImGuiEx.EnumCombo("Label Font", ref labelFont)) {
+            overlay.LabelFont = labelFont;
+            changed = true;
+        }
+        ImGuiComponents.HelpMarker("Letters and special characters may not display in some fonts.");
+
+        var labelFontOutline = overlay.LabelFontOutline;
+        if (ImGuiEx.EnumCombo("Label Font Outline", ref labelFontOutline)) {
+            overlay.LabelFontOutline = labelFontOutline;
+            changed = true;
+        }
         ImGuiEx.ConfigHeader("Spacing Settings");
 
         var panelGap = overlay.PanelGap;
@@ -89,52 +136,6 @@ public class OverlayTab {
         var labelPadding = overlay.LabelPadding;
         if (DrawSpacing("Label Padding", ref labelPadding)) {
             overlay.LabelPadding = labelPadding;
-            changed = true;
-        }
-
-        ImGuiEx.ConfigHeader("Font Settings");
-
-        var quantityFont = overlay.QuantityFont;
-        if (ImGuiEx.EnumCombo("Quantity Font", ref quantityFont)) {
-            overlay.QuantityFont = quantityFont;
-            changed = true;
-        }
-        ImGuiComponents.HelpMarker("Letters and special characters may not display in some fonts.");
-
-        var quantityFontOutline = overlay.QuantityFontOutline;
-        if (ImGuiEx.EnumCombo("Quantity Font Outline", ref quantityFontOutline)) {
-            overlay.QuantityFontOutline = quantityFontOutline;
-            changed = true;
-        }
-
-        var quantityFontSize = (int)overlay.QuantityFontSize;
-        if (ImGui.SliderInt("Quantity Font Size", ref quantityFontSize, 6, 72)) {
-            overlay.QuantityFontSize = (uint)Math.Clamp(quantityFontSize, 3, 200);
-            changed = true;
-        }
-
-        var quantityNodeOffset = overlay.QuantityNodeOffset;
-        if (ImGui.DragFloat2("Quantity Text Offset X/Y", ref quantityNodeOffset, 1, -200, 200, flags: ImGuiSliderFlags.AlwaysClamp)) {
-            overlay.QuantityNodeOffset = quantityNodeOffset;
-            changed = true;
-        }
-
-        var labelFont = overlay.LabelFont;
-        if (ImGuiEx.EnumCombo("Label Font", ref labelFont)) {
-            overlay.LabelFont = labelFont;
-            changed = true;
-        }
-        ImGuiComponents.HelpMarker("Letters and special characters may not display in some fonts.");
-
-        var labelFontOutline = overlay.LabelFontOutline;
-        if (ImGuiEx.EnumCombo("Label Font Outline", ref labelFontOutline)) {
-            overlay.LabelFontOutline = labelFontOutline;
-            changed = true;
-        }
-
-        var labelFontSize = (int)overlay.LabelFontSize;
-        if (ImGui.SliderInt("Label Font Size", ref labelFontSize, 6, 72)) {
-            overlay.LabelFontSize = (uint)Math.Clamp(labelFontSize, 3, 200);
             changed = true;
         }
 
