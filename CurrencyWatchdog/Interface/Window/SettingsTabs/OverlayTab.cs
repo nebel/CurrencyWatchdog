@@ -23,6 +23,14 @@ public class OverlayTab {
             changed = true;
         }
 
+        ImGuiEx.ConfigHeader("Visibility Settings");
+
+        var hideInDuty = overlay.HideInDuty;
+        if (ImGui.Checkbox("Hide in Duty", ref hideInDuty)) {
+            overlay.HideInDuty = hideInDuty;
+            changed = true;
+        }
+
         ImGuiEx.ConfigHeader("Layout Settings");
 
         var position = overlay.Position;

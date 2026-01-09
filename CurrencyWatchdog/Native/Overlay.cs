@@ -1,4 +1,6 @@
 using CurrencyWatchdog.Configuration;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Plugin.Services;
 using KamiToolKit.Extensions;
 using KamiToolKit.Overlay;
 using System;
@@ -16,16 +18,31 @@ public sealed class Overlay : IDisposable {
     public void FrameworkThreadInit() {
         if (MainThreadSafety.TryAssertMainThread()) return;
 
-        Service.Log.Information("NodeController::FrameworkThreadInit");
+        Service.Log.Debug("Overlay::FrameworkThreadInit");
         overlayController = new OverlayController();
         container = new ContainerNode();
 
         overlayController.AddNode(container);
+
+        Service.Framework.Update += OnFrameworkUpdate;
     }
 
     public void Dispose() {
+        Service.Framework.Update -= OnFrameworkUpdate;
+
         container?.Dispose();
         overlayController?.Dispose();
+    }
+
+    private void OnFrameworkUpdate(IFramework framework) {
+        UpdateVisibility();
+    }
+
+    private void UpdateVisibility() {
+        if (Plugin.Config.OverlayConfig.HideInDuty && Service.Condition[ConditionFlag.Jumping])
+            container?.ForceHide = true;
+        else
+            container?.ForceHide = false;
     }
 
     public void UpdateConfig(Config config) {
@@ -35,6 +52,7 @@ public sealed class Overlay : IDisposable {
             return;
         }
 
+        UpdateVisibility();
         container.Configure(config.OverlayConfig);
     }
 

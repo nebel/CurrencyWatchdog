@@ -39,6 +39,7 @@ public class Config : IPluginConfiguration {
 [Serializable]
 public record OverlayConfig {
     public bool Enabled { get; set; } = true;
+    public bool HideInDuty { get; set; } = true;
     public Vector2 Position { get; set; } = new(400f, 200f);
     public float Scale { get; set; } = 1f;
     public float IconSize { get; set; } = 32f;

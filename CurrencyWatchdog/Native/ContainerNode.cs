@@ -11,6 +11,19 @@ public sealed class ContainerNode : OverlayNode {
 
     public readonly List<CurrencyNode> Children = [];
 
+    private int visibleChildren;
+
+    public bool ForceHide {
+        get;
+        set {
+            if (field != value) {
+                field = value;
+                UpdateVisibility();
+            }
+        }
+    } = false;
+
+
     public ContainerNode() {
         Position = new Vector2(400, 200);
         Size = new Vector2(20, 20);
@@ -20,6 +33,14 @@ public sealed class ContainerNode : OverlayNode {
         // Do nothing
     }
 
+    private void UpdateVisibility() {
+        if (ForceHide || visibleChildren == 0) {
+            IsVisible = false;
+        } else {
+            IsVisible = true;
+        }
+    }
+
     public void SetVisibleChildCount(int count) {
         while (Children.Count < count)
             CreateChild();
@@ -27,7 +48,9 @@ public sealed class ContainerNode : OverlayNode {
         for (var i = count; i < Children.Count; i++)
             Children[i].IsVisible = false;
 
-        IsVisible = count > 0;
+        visibleChildren = count;
+
+        UpdateVisibility();
     }
 
     private void CreateChild() {
