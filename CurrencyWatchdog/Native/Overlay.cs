@@ -68,18 +68,18 @@ public sealed class Overlay : IDisposable {
             var node = container.Children[i];
             node.Apply(overlayConfig, PanelPayload.From(element));
 
-            if (direction == LayoutAnchor.Left)
+            if (direction == LayoutDirection.Left)
                 currentPosition -= new Vector2(node.ContentSize.X + padding.Horizontal + gap, 0);
 
             node.Position = currentPosition;
 
-            if (direction is LayoutAnchor.UpLeft or LayoutAnchor.DownLeft)
+            if (direction is LayoutDirection.UpLeft or LayoutDirection.DownLeft)
                 node.Position -= new Vector2(node.ContentSize.X + padding.Horizontal + gap, 0);
 
             currentPosition += direction switch {
-                LayoutAnchor.UpLeft or LayoutAnchor.UpRight => new Vector2(0, -node.ContentSize.Y - padding.Vertical - gap),
-                LayoutAnchor.DownLeft or LayoutAnchor.DownRight => new Vector2(0, node.ContentSize.Y + padding.Vertical + gap),
-                LayoutAnchor.Right => new Vector2(node.ContentSize.X + padding.Horizontal + gap, 0),
+                LayoutDirection.UpLeft or LayoutDirection.UpRight => new Vector2(0, -node.ContentSize.Y - padding.Vertical - gap),
+                LayoutDirection.DownLeft or LayoutDirection.DownRight => new Vector2(0, node.ContentSize.Y + padding.Vertical + gap),
+                LayoutDirection.Right => new Vector2(node.ContentSize.X + padding.Horizontal + gap, 0),
                 _ => Vector2.Zero,
             };
         }

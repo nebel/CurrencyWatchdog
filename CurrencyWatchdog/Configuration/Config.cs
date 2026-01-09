@@ -43,7 +43,7 @@ public record OverlayConfig {
     public Vector2 Position { get; set; } = new(400f, 200f);
     public float Scale { get; set; } = 1f;
     public float IconSize { get; set; } = 32f;
-    public LayoutAnchor LayoutDirection { get; set; } = LayoutAnchor.Right;
+    public LayoutDirection LayoutDirection { get; set; } = LayoutDirection.Right;
     public IconSideType IconSide { get; set; } = IconSideType.Left;
     public GameFont QuantityFont { get; set; } = GameFont.Axis;
     public FontOutlineType QuantityFontOutline { get; set; } = FontOutlineType.Strong;
@@ -165,7 +165,7 @@ public record RuleChatConfig {
 }
 
 [Serializable]
-public enum LayoutAnchor {
+public enum LayoutDirection {
     [Display(Name = "Right")]
     Right,
     [Display(Name = "Left")]
