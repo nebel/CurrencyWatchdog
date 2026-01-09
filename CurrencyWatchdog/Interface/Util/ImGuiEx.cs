@@ -3,8 +3,6 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -112,48 +110,5 @@ public static class ImGuiEx {
 
     public static void FormatHelp() {
         ImGuiComponents.HelpMarker("See \"Format strings\" in the Help tab.");
-    }
-}
-
-public sealed class EnumDrawData<T> : IEnumerable<EnumDrawData<T>.Item> where T : struct, Enum {
-    public readonly T[] Values;
-    public readonly string[] Names;
-    public readonly float Width;
-
-    public static EnumDrawData<T> Calculate() => new();
-
-    private EnumDrawData() {
-        Values = Enum.GetValues<T>();
-        Names = new string[Values.Length];
-
-        var maxTextWidth = 0f;
-        for (var i = 0; i < Values.Length; i++) {
-            var name = Values[i].GetDisplayName();
-
-            var textWidth = ImGui.CalcTextSize(name).X;
-            if (textWidth > maxTextWidth)
-                maxTextWidth = textWidth;
-
-            Names[i] = name;
-        }
-
-        Width = maxTextWidth + (ImGui.GetStyle().FramePadding.X * 2) + ImGui.GetFrameHeight();
-    }
-
-    public IEnumerator<Item> GetEnumerator() {
-        for (var i = 0; i < Values.Length; i++)
-            yield return new Item(Values[i], Names[i]);
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    public readonly struct Item {
-        public readonly T Value;
-        public readonly string DrawName;
-
-        internal Item(T type, string drawName) {
-            Value = type;
-            DrawName = drawName;
-        }
     }
 }
