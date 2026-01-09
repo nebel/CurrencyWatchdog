@@ -63,12 +63,12 @@ public class CurrencyNode : SimpleOverlayNode {
         var iconSize = new Vector2(config.IconSize, config.IconSize);
 
         if (config.PanelSizing == PanelSizingType.Fixed) {
-            labelNode.TextFlags &= ~TextFlags.AutoAdjustNodeSize;
-            labelNode.TextFlags |= TextFlags.Ellipsis;
+            labelNode.RemoveTextFlags(TextFlags.AutoAdjustNodeSize);
+            labelNode.AddTextFlags(TextFlags.Ellipsis);
             labelNode.Size = iconSize with { X = config.PanelWidth };
         } else {
-            labelNode.TextFlags |= TextFlags.AutoAdjustNodeSize;
-            labelNode.TextFlags &= ~TextFlags.Ellipsis;
+            labelNode.RemoveTextFlags(TextFlags.Ellipsis);
+            labelNode.AddTextFlags(TextFlags.AutoAdjustNodeSize);
             labelNode.Size = iconSize;
         }
 
@@ -143,16 +143,15 @@ public class CurrencyNode : SimpleOverlayNode {
     private static void ApplyOutlineType(FontOutlineType outlineType, TextNode node) {
         switch (outlineType) {
             case FontOutlineType.None:
-                node.TextFlags &= ~TextFlags.Edge;
-                node.TextFlags &= ~TextFlags.Glare;
+                node.RemoveTextFlags(TextFlags.Edge, TextFlags.Glare);
                 break;
             case FontOutlineType.Normal:
-                node.TextFlags |= TextFlags.Edge;
-                node.TextFlags &= ~TextFlags.Glare;
+                node.RemoveTextFlags(TextFlags.Glare);
+                node.AddTextFlags(TextFlags.Edge);
                 break;
             case FontOutlineType.Strong:
-                node.TextFlags &= ~TextFlags.Edge;
-                node.TextFlags |= TextFlags.Glare;
+                node.RemoveTextFlags(TextFlags.Edge);
+                node.AddTextFlags(TextFlags.Glare);
                 break;
             default:
                 throw new ArgumentOutOfRangeException($"Unknown FontOutlineType: {outlineType}");

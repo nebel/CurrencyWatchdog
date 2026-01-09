@@ -20,10 +20,6 @@ public sealed class ContainerNode : OverlayNode {
         // Do nothing
     }
 
-    public bool IsOverlayVisible {
-        set => IsVisible = value;
-    }
-
     public void SetVisibleChildCount(int count) {
         while (Children.Count < count)
             CreateChild();
@@ -31,7 +27,7 @@ public sealed class ContainerNode : OverlayNode {
         for (var i = count; i < Children.Count; i++)
             Children[i].IsVisible = false;
 
-        IsOverlayVisible = count > 0;
+        IsVisible = count > 0;
     }
 
     private void CreateChild() {
