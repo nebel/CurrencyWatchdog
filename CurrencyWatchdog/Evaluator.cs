@@ -121,17 +121,17 @@ public class Evaluator {
         };
 
         if (tomestoneItemId == 0)
-            return UnreleasedTomestone();
+            return UnreleasedTomestone(subject);
 
-        return GetItemDetails(subject with { Id = tomestoneItemId }) ?? UnreleasedTomestone();
+        return GetItemDetails(subject with { Id = tomestoneItemId }) ?? UnreleasedTomestone(subject);
     }
 
-    private static SubjectDetails UnreleasedTomestone() {
+    private static SubjectDetails UnreleasedTomestone(Subject subject) {
         return new SubjectDetails {
             Name = "(Unreleased Tomestone)",
             IconId = 65012,
             Cap = 2000,
-            EffectiveCap = 2000,
+            EffectiveCap = subject.OverrideCap ?? 2000,
             QuantityHeld = 0,
         };
     }
@@ -142,13 +142,16 @@ public class Evaluator {
             if (Service.DataManager.Excel.GetSheet<GrandCompanyRank>().GetRowOrDefault(rankRow) is { } rank) {
                 if (GetGrandCompanySealItemId(grandCompany) is var itemId and not 0) {
                     if (GetItemDetails(subject with { Id = itemId }) is { } details) {
-                        return details with { Cap = rank.MaxSeals };
+                        return details with {
+                            Cap = rank.MaxSeals,
+                            EffectiveCap = subject.OverrideCap ?? rank.MaxSeals,
+                        };
                     }
                 }
             }
         }
 
-        return GenericGrandCompanySeal();
+        return GenericGrandCompanySeal(subject);
     }
 
     private static uint GetGrandCompanySealItemId(GrandCompany grandCompany) {
@@ -160,12 +163,12 @@ public class Evaluator {
         };
     }
 
-    private static SubjectDetails GenericGrandCompanySeal() {
+    private static SubjectDetails GenericGrandCompanySeal(Subject subject) {
         return new SubjectDetails {
             Name = "(Generic Grand Company Seal)",
             IconId = 65004,
             Cap = 10000,
-            EffectiveCap = 10000,
+            EffectiveCap = subject.OverrideCap ?? 10000,
             QuantityHeld = 0,
         };
     }
