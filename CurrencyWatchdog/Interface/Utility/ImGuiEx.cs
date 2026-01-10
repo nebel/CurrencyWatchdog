@@ -111,4 +111,13 @@ public static class ImGuiEx {
     public static void TemplateHelp() {
         ImGuiComponents.HelpMarker("See \"Template strings\" in the Help tab.");
     }
+
+    public static Vector4 GetFadedColor(ImGuiCol col, float multiplier) {
+        return GetFadedColor(ImGui.GetStyle().Colors[(int)col], multiplier);
+    }
+
+    public static Vector4 GetFadedColor(Vector4 color, float multiplier) {
+        var w = color.W * multiplier;
+        return color with { W = w };
+    }
 }

@@ -19,7 +19,7 @@ using static CurrencyWatchdog.Expressions.SubjectExpression;
 namespace CurrencyWatchdog.Interface.Window.SettingsTabs;
 
 public class BurdensTab(ConfigWindow window) {
-    private const string PopupEditAlias = "currency-watchdog-edit-alias";
+    private const string PopupEditSubject = "currency-watchdog-edit-alias";
     private const string PopupEditExpression = "currency-watchdog-edit-expression";
     private const string PopupEditOperator = "currency-watchdog-edit-operator";
 
@@ -291,6 +291,12 @@ public class BurdensTab(ConfigWindow window) {
             _ => Vector4.Zero,
         };
 
+        var iconTint = subject.Enabled ? Vector4.One : new Vector4(1, 1, 1, 0.5f);
+        var fadeMultiplier = subject.Enabled ? 1f : 0.3f;
+        var typeColor = ImGuiEx.GetFadedColor(ImGuiCol.TextDisabled, fadeMultiplier);
+        var nameColor = ImGuiEx.GetFadedColor(ImGuiCol.Text, fadeMultiplier);
+        var aliasColor = ImGuiEx.GetFadedColor(ImGuiColors.DalamudViolet, fadeMultiplier);
+
         using var color = new ImRaii.Color()
             .Push(ImGuiCol.Border, new Vector4(1, 1, 1, 0.1f))
             .Push(ImGuiCol.ChildBg, bgCol);
@@ -304,51 +310,71 @@ public class BurdensTab(ConfigWindow window) {
         var startCursor = ImGui.GetCursorPos();
 
         var subjectTypeName = subject.Type.GetDisplayName();
-        ImGui.TextDisabled(subjectTypeName);
+        ImGui.TextColored(typeColor, subjectTypeName);
 
         string subjectName;
         if (Plugin.Evaluator.GetDetails(subject) is { } details) {
             if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(details.IconId)) is { } texture) {
                 using var wrap = texture.GetWrapOrEmpty();
-                ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(specialRowHeight / 2, specialRowHeight / 2));
+                ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(specialRowHeight / 2, specialRowHeight / 2), tintCol: iconTint);
                 ImGui.SameLine();
             }
             subjectName = details.Name;
         } else {
             subjectName = $"ID={subject.Id}";
         }
-        ImGui.Text(subjectName);
+        ImGui.TextColored(nameColor, subjectName);
 
         if (subject.Alias is not null) {
             ImGui.SameLine();
-            ImGui.TextColored(ImGuiColors.DalamudViolet, $"({subject.Alias})");
+            ImGui.TextColored(aliasColor, $"({subject.Alias})");
         }
 
-        var buttonWidth = ImGuiComponents.GetIconButtonWithTextWidth(FontAwesomeIcon.TrashAlt, "");
-        var currentPos =
-            startCursor + new Vector2(
-                ImGui.GetContentRegionAvail().X - buttonWidth,
-                (ImGui.GetFrameHeight() / 2) - ImGui.GetStyle().FramePadding.Y
-            );
+        Vector2 currentPos;
+        {
+            var buttonIcon = FontAwesomeIcon.TrashAlt;
+            var buttonText = "";
+            currentPos =
+                startCursor + new Vector2(
+                    ImGui.GetContentRegionAvail().X - ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText),
+                    (ImGui.GetFrameHeight() / 2) - ImGui.GetStyle().FramePadding.Y
+                );
 
-        ImGui.SetCursorPos(currentPos);
-        using (ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
-            if (ImGuiComponents.IconButton(FontAwesomeIcon.TrashAlt)) {
-                burden.Subjects.RemoveAt(i);
+            ImGui.SetCursorPos(currentPos);
+            using (ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
+                if (ImGuiComponents.IconButton(buttonIcon)) {
+                    burden.Subjects.RemoveAt(i);
+                    changed = true;
+                }
+            }
+            ImGuiEx.HoverTooltip("Delete subject\n(hold shift)");
+        }
+        {
+            var buttonIcon = FontAwesomeIcon.Feather;
+            var buttonText = "";
+            currentPos.X -= ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) + ImGui.GetStyle().ItemSpacing.X;
+            ImGui.SetCursorPos(currentPos);
+            if (ImGuiComponents.IconButton(buttonIcon)) {
+                editingAlias = subject.Alias ?? "";
+                ImGui.OpenPopup(PopupEditSubject);
+            }
+            ImGuiEx.HoverTooltip("Customize");
+
+            DrawSubjectContentsAliasEditPopup(subject, subjectTypeName, subjectName, ref changed);
+        }
+        {
+            var buttonIcon = subject.Enabled ? FontAwesomeIcon.Eye : FontAwesomeIcon.EyeSlash;
+            var buttonText = "";
+            currentPos.X -= ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) + ImGui.GetStyle().ItemSpacing.X;
+            ImGui.SetCursorPos(currentPos);
+            // using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed, !subject.Enabled)) {
+            if (ImGuiComponents.IconButton(buttonIcon)) {
+                subject.Enabled = !subject.Enabled;
                 changed = true;
             }
+            // }
+            ImGuiEx.HoverTooltip("Toggle");
         }
-        ImGuiEx.HoverTooltip("Delete subject\n(hold shift)");
-
-        currentPos.X -= buttonWidth + ImGui.GetStyle().ItemSpacing.X;
-        ImGui.SetCursorPos(currentPos);
-        if (ImGuiComponents.IconButton(FontAwesomeIcon.Feather)) {
-            editingAlias = subject.Alias ?? "";
-            ImGui.OpenPopup(PopupEditAlias);
-        }
-        ImGuiEx.HoverTooltip("Set alias");
-
-        DrawSubjectContentsAliasEditPopup(subject, subjectTypeName, subjectName, ref changed);
 
         // Drag/Drop
 
@@ -369,7 +395,7 @@ public class BurdensTab(ConfigWindow window) {
 
     private void DrawSubjectContentsAliasEditPopup(Subject subject, string subjectTypeName, string subjectName, ref bool changed) {
         using var defaultStyle = ImRaii.DefaultStyle();
-        using var popup = ImRaii.Popup(PopupEditAlias);
+        using var popup = ImRaii.Popup(PopupEditSubject);
         if (!popup) return;
 
         ImGui.Text($"Set alias for {subjectTypeName}: {subjectName}");
@@ -377,13 +403,13 @@ public class BurdensTab(ConfigWindow window) {
         var enter = ImGui.InputText("##Alias", ref editingAlias, 200, ImGuiInputTextFlags.EnterReturnsTrue);
         if (ImGui.IsWindowAppearing()) ImGui.SetKeyboardFocusHere(-1);
         ImGui.SameLine();
-        if (ImGui.Button("Save") || enter) {
+        if (ImGui.Button("Save alias") || enter) {
             subject.Alias = string.IsNullOrEmpty(editingAlias) ? null : editingAlias;
             changed = true;
             ImGui.CloseCurrentPopup();
         }
         ImGui.SameLine();
-        if (ImGui.Button("Clear")) {
+        if (ImGui.Button("Clear alias")) {
             subject.Alias = null;
             changed = true;
             ImGui.CloseCurrentPopup();

@@ -118,6 +118,7 @@ public record Subject {
     public SubjectType Type { get; set; } = SubjectType.Item;
     public uint Id { get; set; }
     public string? Alias { get; set; }
+    public bool Enabled { get; set; } = true;
 }
 
 [Serializable]

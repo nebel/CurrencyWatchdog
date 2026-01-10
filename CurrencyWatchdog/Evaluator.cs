@@ -57,7 +57,8 @@ public class Evaluator {
                 continue;
 
             for (var subjectIndex = 0; subjectIndex < burden.Subjects.Count; subjectIndex++) {
-                if (GetDetails(burden.Subjects[subjectIndex]) is { } itemDetails) {
+                var subject = burden.Subjects[subjectIndex];
+                if (subject.Enabled && GetDetails(subject) is { } itemDetails) {
                     var foundRule = FindMatchingRule(burden, itemDetails);
                     if (foundRule is null or { ShowChat: false, ShowPanel: false })
                         continue;

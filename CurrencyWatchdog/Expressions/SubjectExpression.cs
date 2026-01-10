@@ -4,8 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace CurrencyWatchdog.Expressions;
 
-[JsonDerivedType(typeof(Constant), typeDiscriminator: "Constant")]
-[JsonDerivedType(typeof(Metric), typeDiscriminator: "Metric")]
+[JsonDerivedType(typeof(Constant), "Constant")]
+[JsonDerivedType(typeof(Metric), "Metric")]
 public abstract record SubjectExpression {
     [Serializable]
     public enum MetricType {
