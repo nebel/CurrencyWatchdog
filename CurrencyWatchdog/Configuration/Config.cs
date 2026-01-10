@@ -89,7 +89,7 @@ public record ChatConfig {
     public Vector4 MessageColor { get; set; } = KnownColor.Gold.Vector();
     public Vector4 MessageOutlineColor { get; set; } = KnownColor.Black.Vector();
 
-    public string SuffixTemplate { get; set; } = "{h,} / {c,}";
+    public string SuffixTemplate { get; set; } = "{h:N0} / {c:N0}";
     public Vector4 SuffixColor { get; set; } = KnownColor.DarkOrange.Vector();
     public Vector4 SuffixOutlineColor { get; set; } = KnownColor.Black.Vector();
 }
