@@ -27,6 +27,6 @@ public class MiscTab {
                 Plugin.ConfigManager.FullReset();
             }
         }
-        ImGuiEx.HoverTooltip("Reset EVERYTHING\n(hold shift+ctrl+alt to enable)");
+        ImGuiEx.HoverTooltip("Reset EVERYTHING!\n(hold shift+ctrl+alt to enable)");
     }
 }
