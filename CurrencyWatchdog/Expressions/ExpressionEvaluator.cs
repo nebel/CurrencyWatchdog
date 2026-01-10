@@ -20,7 +20,7 @@ public static class ExpressionEvaluator {
         return cond.Negate ? !result : result;
     }
 
-    private static uint ResolveExpression(SubjectExpression expr, SubjectDetails details) {
+    private static decimal ResolveExpression(SubjectExpression expr, SubjectDetails details) {
         return expr switch {
             Metric m => ResolveMetric(m.Type, details),
             Constant c => c.Value,
@@ -28,7 +28,7 @@ public static class ExpressionEvaluator {
         };
     }
 
-    private static uint ResolveMetric(MetricType type, SubjectDetails details) {
+    private static decimal ResolveMetric(MetricType type, SubjectDetails details) {
         return type switch {
             MetricType.Cap => details.Cap,
             MetricType.QuantityHeld => details.QuantityHeld,

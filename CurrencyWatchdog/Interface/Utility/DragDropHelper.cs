@@ -2,7 +2,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using System;
 
-namespace CurrencyWatchdog.Interface.Util;
+namespace CurrencyWatchdog.Interface.Utility;
 
 public sealed class DragDropHelper(string payloadId) {
     private int? SourceIndex { get; set; }

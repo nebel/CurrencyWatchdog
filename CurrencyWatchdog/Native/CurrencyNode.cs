@@ -89,7 +89,7 @@ public class CurrencyNode : SimpleOverlayNode {
     public void Apply(OverlayConfig config, PanelPayload payload) {
         IsVisible = true;
 
-        var textPadding = !string.IsNullOrEmpty(payload.LabelFormat) || config.PanelSizing == PanelSizingType.Fixed
+        var textPadding = !string.IsNullOrEmpty(payload.LabelTemplate) || config.PanelSizing == PanelSizingType.Fixed
             ? config.LabelPadding
             : HorizontalSpacing.Zero;
         currentTextPadding = textPadding;
@@ -100,7 +100,7 @@ public class CurrencyNode : SimpleOverlayNode {
             : new Vector2(textPadding.Left, 0.0f);
 
         labelNode.Position = labelPosition;
-        labelNode.SeString = payload.LabelFormat;
+        labelNode.SeString = payload.LabelTemplate;
         labelNode.TextColor = payload.LabelColor;
         labelNode.TextOutlineColor = payload.LabelOutlineColor;
 
@@ -112,7 +112,7 @@ public class CurrencyNode : SimpleOverlayNode {
         iconImageNode.IconId = payload.Icon;
 
         quantityNode.Position = iconPosition + config.QuantityNodeOffset;
-        quantityNode.SeString = payload.QuantityFormat;
+        quantityNode.SeString = payload.QuantityTemplate;
         quantityNode.TextColor = payload.QuantityColor;
         quantityNode.TextOutlineColor = payload.QuantityOutlineColor;
 

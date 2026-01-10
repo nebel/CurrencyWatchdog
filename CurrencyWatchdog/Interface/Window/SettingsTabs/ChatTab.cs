@@ -1,5 +1,5 @@
 using CurrencyWatchdog.Configuration;
-using CurrencyWatchdog.Interface.Util;
+using CurrencyWatchdog.Interface.Utility;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -84,12 +84,12 @@ public class ChatTab {
         using (ImRaii.PushId("message")) {
             ImGuiEx.ConfigHeader("Message");
 
-            var message = chat.MessageFormat;
-            if (ImGui.InputText("Format", ref message)) {
-                chat.MessageFormat = message;
+            var message = chat.MessageTemplate;
+            if (ImGui.InputText("Template", ref message)) {
+                chat.MessageTemplate = message;
                 changed = true;
             }
-            ImGuiEx.FormatHelp();
+            ImGuiEx.TemplateHelp();
 
             var messageColor = chat.MessageColor;
             if (ImGui.ColorEdit4("Color", ref messageColor, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar)) {
@@ -107,12 +107,12 @@ public class ChatTab {
         using (ImRaii.PushId("suffix")) {
             ImGuiEx.ConfigHeader("Message Suffix");
 
-            var suffix = chat.SuffixFormat;
-            if (ImGui.InputText("Format", ref suffix)) {
-                chat.SuffixFormat = suffix;
+            var suffix = chat.SuffixTemplate;
+            if (ImGui.InputText("Template", ref suffix)) {
+                chat.SuffixTemplate = suffix;
                 changed = true;
             }
-            ImGuiEx.FormatHelp();
+            ImGuiEx.TemplateHelp();
 
             var suffixColor = chat.SuffixColor;
             if (ImGui.ColorEdit4("Color", ref suffixColor, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar)) {

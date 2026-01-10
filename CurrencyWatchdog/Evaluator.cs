@@ -77,6 +77,7 @@ public class Evaluator {
     }
 
     private static Rule? FindMatchingRule(Burden burden, SubjectDetails subjectDetails) {
+        // Service.Log.Debug($"Subject: {subjectDetails}");
         foreach (var rule in burden.Rules) {
             if (!rule.Enabled)
                 continue;
@@ -213,24 +214,24 @@ public record SubjectDetails {
     public uint? LimitedCap;
     public uint? LimitedQuantityHeld;
 
-    public uint QuantityHeldPercentage {
+    public decimal QuantityHeldPercentage {
         get {
             if (QuantityHeld > Cap)
                 return 100;
             if (Cap is not 0)
-                return QuantityHeld * 100 / Cap;
+                return (decimal)QuantityHeld * 100 / Cap;
             return 0;
         }
     }
 
     public uint QuantityMissing => QuantityHeld > Cap ? 0 : Cap - QuantityHeld;
 
-    public uint? LimitedQuantityHeldPercentage {
+    public decimal? LimitedQuantityHeldPercentage {
         get {
             if (LimitedCap is { } limitedCap and not 0 && LimitedQuantityHeld is { } limitedQuantityHeld) {
                 if (limitedQuantityHeld > limitedCap)
                     return 100;
-                return limitedQuantityHeld * 100 / limitedCap;
+                return (decimal)limitedQuantityHeld * 100 / limitedCap;
             }
             return null;
         }

@@ -43,7 +43,7 @@ public static class Debugging {
                         },
                         new Rule {
                             Conds = [new Cond(new Metric(MetricType.QuantityHeld), Operator.GreaterThanOrEqualTo, new Constant(5000))],
-                            PanelConfig = new RulePanelConfig { QuantityColor = KnownColor.GreenYellow.Vector(), QuantityFormat = "{h.2}" },
+                            PanelConfig = new RulePanelConfig { QuantityColor = KnownColor.GreenYellow.Vector(), QuantityTemplate = "{h:Z}" },
                         },
                     ],
                 },
@@ -52,7 +52,7 @@ public static class Debugging {
                     Rules = [
                         new Rule {
                             Conds = [new Cond(new Metric(MetricType.QuantityHeldPercentage), Operator.GreaterThanOrEqualTo, new Constant(50))],
-                            PanelConfig = new RulePanelConfig { QuantityColor = KnownColor.MediumAquamarine.Vector(), QuantityFormat = "{h.}" },
+                            PanelConfig = new RulePanelConfig { QuantityColor = KnownColor.MediumAquamarine.Vector(), QuantityTemplate = "{h:Z}" },
                         },
                     ],
                 },

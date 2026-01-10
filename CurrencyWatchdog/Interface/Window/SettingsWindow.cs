@@ -1,5 +1,5 @@
 using CurrencyWatchdog.Configuration;
-using CurrencyWatchdog.Interface.Util;
+using CurrencyWatchdog.Interface.Utility;
 using CurrencyWatchdog.Interface.Window.SettingsTabs;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;

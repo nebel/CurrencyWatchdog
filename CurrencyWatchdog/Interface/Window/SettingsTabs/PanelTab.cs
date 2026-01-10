@@ -1,5 +1,5 @@
 using CurrencyWatchdog.Configuration;
-using CurrencyWatchdog.Interface.Util;
+using CurrencyWatchdog.Interface.Utility;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
@@ -17,12 +17,12 @@ public class PanelTab {
         using (ImRaii.PushId("quantity")) {
             ImGuiEx.ConfigTopHeader("Quantity Display");
 
-            var quantityFormat = panel.QuantityFormat;
-            if (ImGui.InputText("Format", ref quantityFormat)) {
-                panel.QuantityFormat = quantityFormat;
+            var quantityTemplate = panel.QuantityTemplate;
+            if (ImGui.InputText("Template", ref quantityTemplate)) {
+                panel.QuantityTemplate = quantityTemplate;
                 changed = true;
             }
-            ImGuiEx.FormatHelp();
+            ImGuiEx.TemplateHelp();
 
             var quantityColor = panel.QuantityColor;
             if (ImGui.ColorEdit4("Color", ref quantityColor, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar)) {
@@ -40,12 +40,12 @@ public class PanelTab {
         using (ImRaii.PushId("label")) {
             ImGuiEx.ConfigHeader("Label Display");
 
-            var labelFormat = panel.LabelFormat;
-            if (ImGui.InputText("Format", ref labelFormat)) {
-                panel.LabelFormat = labelFormat;
+            var labelTemplate = panel.LabelTemplate;
+            if (ImGui.InputText("Template", ref labelTemplate)) {
+                panel.LabelTemplate = labelTemplate;
                 changed = true;
             }
-            ImGuiEx.FormatHelp();
+            ImGuiEx.TemplateHelp();
 
             var labelColor = panel.LabelColor;
             if (ImGui.ColorEdit4("Color", ref labelColor, ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.AlphaBar)) {

@@ -3,6 +3,9 @@ using CurrencyWatchdog.Configuration;
 namespace CurrencyWatchdog.Utility;
 
 public static class Utils {
+    public const string DecimalDisplayFormat = "#,##0.#########";
+    public const decimal CustomConstantMax = 999_999_999_999m;
+
     public static (uint IconId, string Name) GetBurdenDisplay(Burden burden) {
         var autoIcon = 60071u; // was: 61523u
         var autoName = "(Unnamed)";

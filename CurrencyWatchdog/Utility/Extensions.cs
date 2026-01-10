@@ -22,7 +22,7 @@ public static class Extensions {
     extension(SubjectExpression self) {
         public string GetDisplayName() {
             return self switch {
-                SubjectExpression.Constant constant => constant.Value.ToString("N0"),
+                SubjectExpression.Constant constant => constant.Value.ToString(Utils.DecimalDisplayFormat),
                 SubjectExpression.Metric metric => metric.Type.GetDisplayName(),
                 _ => "???",
             };

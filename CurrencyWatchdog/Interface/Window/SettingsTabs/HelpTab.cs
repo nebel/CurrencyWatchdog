@@ -1,6 +1,9 @@
-using CurrencyWatchdog.Interface.Util;
+using CurrencyWatchdog.Interface.Utility;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Utility;
 
 namespace CurrencyWatchdog.Interface.Window.SettingsTabs;
 
@@ -36,11 +39,11 @@ public class HelpTab {
 
         ImGui.Spacing();
 
-        if (ImGui.CollapsingHeader("Format strings")) {
-            ImGui.TextWrapped("Format strings are text labels with support for special placeholder values.");
+        if (ImGui.CollapsingHeader("Template strings")) {
+            ImGui.TextWrapped("Template strings are text labels with support for special placeholder values.");
 
             ImGuiEx.ConfigHeader("Placeholders");
-            ImGui.TextWrapped("Format strings accept special placeholders which are automatically replaced by certain values related to the subject being " +
+            ImGui.TextWrapped("Template strings accept special placeholders which are automatically replaced by certain values related to the subject being " +
                               "tracked.");
             ImGui.TextWrapped("The following text-based placeholders are available:\n" +
                               " -  {n} = Name\n" +
@@ -57,11 +60,35 @@ public class HelpTab {
                               " -  {P} = Same as {p} but for the limited cap\n" +
                               " -  {M} = Same as {m} but for the limited cap\n");
 
-            ImGuiEx.ConfigHeader("Format modifiers");
-            ImGui.TextWrapped("Numeric placeholders (c, h, p and m) support an optional suffix which changes how the number is displayed:\n" +
-                              " -  Adding a comma, e.g. {h,} will display the number with commas (e.g. 5,263)\n" +
-                              " -  Adding a dot, e.g. {h.} will display the number as an abbreviated decimal for numbers over 1,000 (e.g. 5.26K)\n" +
-                              " -  Adding a dot and a number, e.g. {h.1} controls how many digits are shown for the abbreviated decimal");
+            ImGuiEx.ConfigHeader("Format strings");
+
+            ImGui.TextWrapped("Numeric placeholders (c, h, p and m) support an optional format string which changes how the number is displayed. The " +
+                              "format string must be placed after a \":\" (colon) in the curly brackets, such that \"{h:N0}\" will print the \"{h}\" " +
+                              "placeholder using the format string \"N0\".");
+
+            ImGui.TextWrapped("For full details, see the following pages:");
+            using (ImRaii.PushIndent()) {
+                if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Globe, "Standard numeric format strings")) {
+                    Util.OpenLink("https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings");
+                }
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Globe, "Custom numeric format strings")) {
+                    Util.OpenLink("https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-numeric-format-strings");
+                }
+            }
+
+            ImGui.TextWrapped("In addition to the above standards, the following non-standard additions are available:\n" +
+                              " -  If a format string starts with ^, the number will be rounded up to the nearest integer before formatting.\n" +
+                              " -  If a format string starts with _, the number will be rounded down to the nearest integer before formatting.\n" +
+                              " -  A special format specifier Z (or z) is available which will print the number as an abbreviated decimal for numbers over " +
+                              "1,000. A number can also be provided to choose how many digits are shown, e.g. Z1 or z4. The default is 3 digits.");
+
+            ImGui.TextWrapped("Examples:\n" +
+                              " -  {h:N0} will print the held number with commas and no decimal places (e.g. 5,263)\n" +
+                              " -  {h:Z} will print the held number as an abbreviated decimal for numbers over 1,000 (e.g. 5.26K)\n" +
+                              " -  {p:0.000}% will print the percentage held up to 3 decimal places (e.g. 8.315%)");
+
+            ImGui.TextWrapped("If no format string is provided, numbers are displayed rounded down with no decimals and no commas.");
         }
 
         ImGui.Spacing();

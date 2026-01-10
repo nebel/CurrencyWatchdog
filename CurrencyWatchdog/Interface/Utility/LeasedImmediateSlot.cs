@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace CurrencyWatchdog.Interface.Util;
+namespace CurrencyWatchdog.Interface.Utility;
 
 public sealed class LeasedImmediateSlot<TKey, T>
     where TKey : notnull {

@@ -28,7 +28,7 @@ public abstract record SubjectExpression {
     }
 
     [Serializable]
-    public record Constant(uint Value) : SubjectExpression;
+    public record Constant(decimal Value) : SubjectExpression;
 
     [Serializable]
     public record Metric(MetricType Type) : SubjectExpression;

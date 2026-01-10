@@ -1,6 +1,6 @@
 using CurrencyWatchdog.Configuration;
 using CurrencyWatchdog.Expressions;
-using CurrencyWatchdog.Interface.Util;
+using CurrencyWatchdog.Interface.Utility;
 using CurrencyWatchdog.Utility;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -11,6 +11,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using static CurrencyWatchdog.Expressions.SubjectExpression;
@@ -28,7 +29,7 @@ public class BurdensTab(ConfigWindow window) {
 
     private int selectedBurdenIndex = -1;
     private string editingAlias = "";
-    private uint editingConstant;
+    private string editingConstant = "";
 
     public void Draw(Config config, ref bool changed) {
         using var table = ImRaii.Table("BurdensLayout", 2, ImGuiTableFlags.Resizable | ImGuiTableFlags.BordersInnerV);
@@ -554,7 +555,7 @@ public class BurdensTab(ConfigWindow window) {
 
     private bool DrawExpr(ref SubjectExpression expr, Vector2 size) {
         if (ImGui.Button(expr.GetDisplayName(), size)) {
-            editingConstant = expr is Constant { Value: var constant } ? constant : 0;
+            editingConstant = (expr is Constant { Value: var constant } ? constant : 0).ToString(Utils.DecimalDisplayFormat);
             ImGui.OpenPopup(PopupEditExpression);
         }
 
@@ -562,14 +563,28 @@ public class BurdensTab(ConfigWindow window) {
         using var popup = ImRaii.Popup(PopupEditExpression);
         if (!popup) return false;
 
-        var constantValue = (int)editingConstant;
+        var constantValue = editingConstant;
         ImGui.PushItemWidth(size.X);
-        if (ImGui.InputInt("##customValue", ref constantValue, 10, 100))
-            editingConstant = (uint)Math.Clamp(constantValue, 0, int.MaxValue);
-        if (ImGui.Button("Set custom value", size)) {
-            expr = new Constant(editingConstant);
-            ImGui.CloseCurrentPopup();
-            return true;
+        if (ImGui.InputText("##customValue", ref constantValue, 20)) {
+            editingConstant = constantValue;
+        }
+
+        decimal? constantValueParsed = null;
+        try {
+            var cleanedConstantValue = constantValue.Trim().Replace(",", "");
+            constantValueParsed = Math.Clamp(decimal.Parse(cleanedConstantValue, NumberStyles.Any, CultureInfo.InvariantCulture), 0, Utils.CustomConstantMax);
+        } catch {
+            // Failed to parse, leave constantValueParsed as null
+        }
+
+        using (ImRaii.Disabled(!constantValueParsed.HasValue)) {
+            if (ImGui.Button("Set custom value", size)) {
+                if (constantValueParsed is { } customValue) {
+                    expr = new Constant(customValue);
+                    ImGui.CloseCurrentPopup();
+                    return true;
+                }
+            }
         }
 
         ImGuiEx.SpacedSeparator();
@@ -666,14 +681,13 @@ public class BurdensTab(ConfigWindow window) {
         using var indent = ImRaii.PushIndent();
         var width = 250 * ImGuiHelpers.GlobalScale;
 
-        var quantity = panel.QuantityFormat;
-
+        var quantityTemplate = panel.QuantityTemplate;
         ImGui.PushItemWidth(width);
-        if (ImGuiEx.NullableInputText("Quantity Format", Plugin.Config.PanelConfig.QuantityFormat, ref quantity)) {
-            panel.QuantityFormat = quantity;
+        if (ImGuiEx.NullableInputText("Quantity Template", Plugin.Config.PanelConfig.QuantityTemplate, ref quantityTemplate)) {
+            panel.QuantityTemplate = quantityTemplate;
             changed = true;
         }
-        ImGuiEx.FormatHelp();
+        ImGuiEx.TemplateHelp();
 
         var quantityColor = panel.QuantityColor;
         ImGui.PushItemWidth(width);
@@ -689,13 +703,13 @@ public class BurdensTab(ConfigWindow window) {
             changed = true;
         }
 
-        var labelFormat = panel.LabelFormat;
+        var labelTemplate = panel.LabelTemplate;
         ImGui.PushItemWidth(width);
-        if (ImGuiEx.NullableInputText("Label Format", Plugin.Config.PanelConfig.LabelFormat, ref labelFormat)) {
-            panel.LabelFormat = labelFormat;
+        if (ImGuiEx.NullableInputText("Label Template", Plugin.Config.PanelConfig.LabelTemplate, ref labelTemplate)) {
+            panel.LabelTemplate = labelTemplate;
             changed = true;
         }
-        ImGuiEx.FormatHelp();
+        ImGuiEx.TemplateHelp();
 
         var labelColor = panel.LabelColor;
         ImGui.PushItemWidth(width);
@@ -725,7 +739,7 @@ public class BurdensTab(ConfigWindow window) {
 
         var message = chat.Message;
         ImGui.PushItemWidth(width);
-        if (ImGuiEx.NullableInputText("Message", Plugin.Config.ChatConfig.MessageFormat, ref message)) {
+        if (ImGuiEx.NullableInputText("Message", Plugin.Config.ChatConfig.MessageTemplate, ref message)) {
             chat.Message = message;
             changed = true;
         }
@@ -746,7 +760,7 @@ public class BurdensTab(ConfigWindow window) {
 
         var suffix = chat.Suffix;
         ImGui.PushItemWidth(width);
-        if (ImGuiEx.NullableInputText("Suffix", Plugin.Config.ChatConfig.SuffixFormat, ref suffix)) {
+        if (ImGuiEx.NullableInputText("Suffix", Plugin.Config.ChatConfig.SuffixTemplate, ref suffix)) {
             chat.Suffix = suffix;
             changed = true;
         }

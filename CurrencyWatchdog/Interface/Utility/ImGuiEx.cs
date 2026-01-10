@@ -6,7 +6,7 @@ using System;
 using System.Linq;
 using System.Numerics;
 
-namespace CurrencyWatchdog.Interface.Util;
+namespace CurrencyWatchdog.Interface.Utility;
 
 public static class ImGuiEx {
     public static IDisposable CursorExcursion() {
@@ -108,7 +108,7 @@ public static class ImGuiEx {
         ImGui.Spacing();
     }
 
-    public static void FormatHelp() {
-        ImGuiComponents.HelpMarker("See \"Format strings\" in the Help tab.");
+    public static void TemplateHelp() {
+        ImGuiComponents.HelpMarker("See \"Template strings\" in the Help tab.");
     }
 }

@@ -61,10 +61,10 @@ public record OverlayConfig {
 
 [Serializable]
 public record PanelConfig {
-    public string QuantityFormat { get; set; } = "{h}";
+    public string QuantityTemplate { get; set; } = "{h}";
     public Vector4 QuantityColor { get; set; } = KnownColor.White.Vector();
     public Vector4 QuantityOutlineColor { get; set; } = KnownColor.Black.Vector();
-    public string LabelFormat { get; set; } = "{a}";
+    public string LabelTemplate { get; set; } = "{a}";
     public Vector4 LabelColor { get; set; } = KnownColor.White.Vector();
     public Vector4 LabelOutlineColor { get; set; } = KnownColor.Black.Vector();
     public Vector4 BackdropColor { get; set; } = KnownColor.Black.Vector() with { W = 0.5f };
@@ -85,11 +85,11 @@ public record ChatConfig {
     public Vector4 PrefixColor { get; set; } = KnownColor.HotPink.Vector();
     public Vector4 PrefixOutlineColor { get; set; } = KnownColor.Black.Vector();
 
-    public string MessageFormat { get; set; } = "{a}: ";
+    public string MessageTemplate { get; set; } = "{a}: ";
     public Vector4 MessageColor { get; set; } = KnownColor.Gold.Vector();
     public Vector4 MessageOutlineColor { get; set; } = KnownColor.Black.Vector();
 
-    public string SuffixFormat { get; set; } = "{h,} / {c,}";
+    public string SuffixTemplate { get; set; } = "{h,} / {c,}";
     public Vector4 SuffixColor { get; set; } = KnownColor.DarkOrange.Vector();
     public Vector4 SuffixOutlineColor { get; set; } = KnownColor.Black.Vector();
 }
@@ -145,10 +145,10 @@ public class Rule {
 
 [Serializable]
 public record RulePanelConfig {
-    public string? QuantityFormat { get; set; }
+    public string? QuantityTemplate { get; set; }
     public Vector4? QuantityColor { get; set; }
     public Vector4? QuantityOutlineColor { get; set; }
-    public string? LabelFormat { get; set; }
+    public string? LabelTemplate { get; set; }
     public Vector4? LabelColor { get; set; }
     public Vector4? LabelOutlineColor { get; set; }
     public Vector4? BackdropColor { get; set; }
