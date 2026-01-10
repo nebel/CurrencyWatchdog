@@ -334,9 +334,22 @@ public class BurdensTab(ConfigWindow window) {
             ImGui.TextColored(aliasColor, $"({subject.Alias})");
         }
 
-        if (subject.OverrideCap is { } overrideCap) {
+        if (subjectDetails != null) {
             ImGui.SameLine();
-            ImGui.TextColored(overrideCapColor, $"(Cap = {overrideCap.ToString(Utils.UintDisplayFormat)})");
+            ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeld.ToString(Utils.UintDisplayFormat)}");
+            ImGui.SameLine();
+            ImGui.TextColored(typeColor, "/");
+            ImGui.SameLine();
+            if (subject.OverrideCap is not null) {
+                ImGui.TextColored(overrideCapColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)} *");
+            } else {
+                ImGui.TextColored(typeColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)}");
+            }
+        } else {
+            if (subject.OverrideCap is { } overrideCap) {
+                ImGui.SameLine();
+                ImGui.TextColored(overrideCapColor, $"(Cap = {overrideCap.ToString(Utils.UintDisplayFormat)})");
+            }
         }
 
         Vector2 currentPos;
