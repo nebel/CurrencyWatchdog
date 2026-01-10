@@ -336,7 +336,7 @@ public class BurdensTab(ConfigWindow window) {
 
         if (subject.OverrideCap is { } overrideCap) {
             ImGui.SameLine();
-            ImGui.TextColored(overrideCapColor, $"({overrideCap.ToString(Utils.UintDisplayFormat)})");
+            ImGui.TextColored(overrideCapColor, $"(Cap = {overrideCap.ToString(Utils.UintDisplayFormat)})");
         }
 
         Vector2 currentPos;
@@ -370,19 +370,17 @@ public class BurdensTab(ConfigWindow window) {
             }
             ImGuiEx.HoverTooltip("Customize");
 
-            DrawSubjectContentsAliasEditPopup(subject, subjectTypeName, subjectName, ref changed);
+            DrawSubjectCustomizePopup(subject, subjectTypeName, subjectName, ref changed);
         }
         {
             var buttonIcon = subject.Enabled ? FontAwesomeIcon.Eye : FontAwesomeIcon.EyeSlash;
             var buttonText = "";
             currentPos.X -= ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) + ImGui.GetStyle().ItemSpacing.X;
             ImGui.SetCursorPos(currentPos);
-            // using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed, !subject.Enabled)) {
             if (ImGuiComponents.IconButton(buttonIcon)) {
                 subject.Enabled = !subject.Enabled;
                 changed = true;
             }
-            // }
             ImGuiEx.HoverTooltip("Toggle");
         }
 
@@ -403,7 +401,7 @@ public class BurdensTab(ConfigWindow window) {
         }
     }
 
-    private void DrawSubjectContentsAliasEditPopup(Subject subject, string subjectTypeName, string subjectName, ref bool changed) {
+    private void DrawSubjectCustomizePopup(Subject subject, string subjectTypeName, string subjectName, ref bool changed) {
         using var defaultStyle = ImRaii.DefaultStyle();
         using var popup = ImRaii.Popup(PopupEditSubject);
         if (!popup) return;
