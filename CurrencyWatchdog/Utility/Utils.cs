@@ -3,6 +3,7 @@ using CurrencyWatchdog.Configuration;
 namespace CurrencyWatchdog.Utility;
 
 public static class Utils {
+    public const string UintDisplayFormat = "N0";
     public const string DecimalDisplayFormat = "#,##0.#########";
     public const decimal CustomConstantMax = 999_999_999_999m;
 

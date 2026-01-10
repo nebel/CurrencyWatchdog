@@ -25,6 +25,7 @@ public record Alert(AlertId AlertId, Rule ActiveRule, SubjectDetails SubjectDeta
             Name = "Dummy",
             IconId = 105,
             Cap = 100,
+            EffectiveCap = 100,
             QuantityHeld = 99,
         };
         return new Alert(alertId, rule, itemDetails);

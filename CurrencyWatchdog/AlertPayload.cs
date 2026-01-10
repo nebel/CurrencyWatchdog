@@ -75,7 +75,7 @@ public static partial class PayloadUtils {
             return key switch {
                 'n' => d.Name,
                 'a' => d.Alias ?? d.Name,
-                'c' => FormatSpec(d.Cap, spec),
+                'c' => FormatSpec(d.EffectiveCap, spec),
                 'h' => FormatSpec(d.QuantityHeld, spec),
                 'p' => FormatSpec(d.QuantityHeldPercentage, spec),
                 'm' => FormatSpec(d.QuantityMissing, spec),

@@ -30,7 +30,7 @@ public static class ExpressionEvaluator {
 
     private static decimal ResolveMetric(MetricType type, SubjectDetails details) {
         return type switch {
-            MetricType.Cap => details.Cap,
+            MetricType.Cap => details.EffectiveCap,
             MetricType.QuantityHeld => details.QuantityHeld,
             MetricType.QuantityHeldPercentage => details.QuantityHeldPercentage,
             MetricType.QuantityMissing => details.QuantityMissing,

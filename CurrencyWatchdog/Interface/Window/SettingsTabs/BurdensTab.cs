@@ -30,6 +30,7 @@ public class BurdensTab(ConfigWindow window) {
     private int selectedBurdenIndex = -1;
     private string editingAlias = "";
     private string editingConstant = "";
+    private uint editingOverrideCap;
 
     public void Draw(Config config, ref bool changed) {
         using var table = ImRaii.Table("BurdensLayout", 2, ImGuiTableFlags.Resizable | ImGuiTableFlags.BordersInnerV);
@@ -275,14 +276,14 @@ public class BurdensTab(ConfigWindow window) {
         for (var i = 0; i < burden.Subjects.Count; i++) {
             using var id = ImRaii.PushId($"subject:{i}");
             var subject = burden.Subjects[i];
-            DrawSubjectContents(burden, subject, i, ref changed);
+            DrawSubject(burden, subject, i, ref changed);
             ImGui.Spacing();
         }
         subjectDragDrop.EndFrame();
     }
 
-    private void DrawSubjectContents(Burden burden, Subject subject, int i, ref bool changed) {
-        const float specialRowHeight = 40;
+    private void DrawSubject(Burden burden, Subject subject, int i, ref bool changed) {
+        const float rowHeight = 40;
 
         var bgCol = subjectDragDrop.GetDragState(i) switch {
             DragDropHelper.DragState.None => new Vector4(1, 1, 1, 0.05f),
@@ -296,6 +297,7 @@ public class BurdensTab(ConfigWindow window) {
         var typeColor = ImGuiEx.GetFadedColor(ImGuiCol.TextDisabled, fadeMultiplier);
         var nameColor = ImGuiEx.GetFadedColor(ImGuiCol.Text, fadeMultiplier);
         var aliasColor = ImGuiEx.GetFadedColor(ImGuiColors.DalamudViolet, fadeMultiplier);
+        var overrideCapColor = ImGuiEx.GetFadedColor(ImGuiColors.ParsedGold, fadeMultiplier);
 
         using var color = new ImRaii.Color()
             .Push(ImGuiCol.Border, new Vector4(1, 1, 1, 0.1f))
@@ -304,7 +306,7 @@ public class BurdensTab(ConfigWindow window) {
             .Push(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0))
             .Push(ImGuiStyleVar.WindowPadding, ImGuiHelpers.ScaledVector2(4, 0))
             .Push(ImGuiStyleVar.ChildRounding, 3);
-        using var child = ImRaii.Child($"subjectChild", ImGuiHelpers.ScaledVector2(-1, specialRowHeight), true, ImGuiWindowFlags.NoMove);
+        using var child = ImRaii.Child($"subjectChild", ImGuiHelpers.ScaledVector2(-1, rowHeight), true, ImGuiWindowFlags.NoMove);
         if (!child) return;
 
         var startCursor = ImGui.GetCursorPos();
@@ -312,14 +314,16 @@ public class BurdensTab(ConfigWindow window) {
         var subjectTypeName = subject.Type.GetDisplayName();
         ImGui.TextColored(typeColor, subjectTypeName);
 
+        var subjectDetails = Plugin.Evaluator.GetDetails(subject);
+
         string subjectName;
-        if (Plugin.Evaluator.GetDetails(subject) is { } details) {
-            if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(details.IconId)) is { } texture) {
+        if (subjectDetails != null) {
+            if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(subjectDetails.IconId)) is { } texture) {
                 using var wrap = texture.GetWrapOrEmpty();
-                ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(specialRowHeight / 2, specialRowHeight / 2), tintCol: iconTint);
+                ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(rowHeight / 2, rowHeight / 2), tintCol: iconTint);
                 ImGui.SameLine();
             }
-            subjectName = details.Name;
+            subjectName = subjectDetails.Name;
         } else {
             subjectName = $"ID={subject.Id}";
         }
@@ -328,6 +332,11 @@ public class BurdensTab(ConfigWindow window) {
         if (subject.Alias is not null) {
             ImGui.SameLine();
             ImGui.TextColored(aliasColor, $"({subject.Alias})");
+        }
+
+        if (subject.OverrideCap is { } overrideCap) {
+            ImGui.SameLine();
+            ImGui.TextColored(overrideCapColor, $"({overrideCap.ToString(Utils.UintDisplayFormat)})");
         }
 
         Vector2 currentPos;
@@ -356,6 +365,7 @@ public class BurdensTab(ConfigWindow window) {
             ImGui.SetCursorPos(currentPos);
             if (ImGuiComponents.IconButton(buttonIcon)) {
                 editingAlias = subject.Alias ?? "";
+                editingOverrideCap = subjectDetails?.EffectiveCap ?? 999;
                 ImGui.OpenPopup(PopupEditSubject);
             }
             ImGuiEx.HoverTooltip("Customize");
@@ -379,7 +389,7 @@ public class BurdensTab(ConfigWindow window) {
         // Drag/Drop
 
         ImGui.SetCursorPos(startCursor);
-        ImGui.InvisibleButton("##dragDropFrame", new Vector2(-1, specialRowHeight));
+        ImGui.InvisibleButton("##dragDropFrame", new Vector2(-1, rowHeight));
 
         using (var drag = subjectDragDrop.Drag(i)) {
             if (drag) ImGui.Text($"Reorder: {subjectName}");
@@ -398,12 +408,17 @@ public class BurdensTab(ConfigWindow window) {
         using var popup = ImRaii.Popup(PopupEditSubject);
         if (!popup) return;
 
-        ImGui.Text($"Set alias for {subjectTypeName}: {subjectName}");
+        ImGui.Text($"Customize {subjectTypeName}: {subjectName}");
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+
         ImGui.SetNextItemWidth(160 * ImGuiHelpers.GlobalScale);
-        var enter = ImGui.InputText("##Alias", ref editingAlias, 200, ImGuiInputTextFlags.EnterReturnsTrue);
+        ImGui.Text("Alias");
+        var aliasEnter = ImGui.InputText("##alias", ref editingAlias, 200, ImGuiInputTextFlags.EnterReturnsTrue);
         if (ImGui.IsWindowAppearing()) ImGui.SetKeyboardFocusHere(-1);
         ImGui.SameLine();
-        if (ImGui.Button("Save alias") || enter) {
+        if (ImGui.Button("Save alias") || aliasEnter) {
             subject.Alias = string.IsNullOrEmpty(editingAlias) ? null : editingAlias;
             changed = true;
             ImGui.CloseCurrentPopup();
@@ -411,6 +426,25 @@ public class BurdensTab(ConfigWindow window) {
         ImGui.SameLine();
         if (ImGui.Button("Clear alias")) {
             subject.Alias = null;
+            changed = true;
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.Text("Custom Cap");
+        ImGui.SetNextItemWidth(160 * ImGuiHelpers.GlobalScale);
+        var localEditingOverrideCap = (int)editingOverrideCap;
+        if (ImGui.InputInt("##overrideCap", ref localEditingOverrideCap, 1, 100)) {
+            editingOverrideCap = (uint)Math.Clamp(localEditingOverrideCap, 1, 999_999_999);
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Save cap")) {
+            subject.OverrideCap = editingOverrideCap;
+            changed = true;
+            ImGui.CloseCurrentPopup();
+        }
+        ImGui.SameLine();
+        if (ImGui.Button("Clear cap")) {
+            subject.OverrideCap = null;
             changed = true;
             ImGui.CloseCurrentPopup();
         }

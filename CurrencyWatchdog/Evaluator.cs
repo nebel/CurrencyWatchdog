@@ -131,6 +131,7 @@ public class Evaluator {
             Name = "(Unreleased Tomestone)",
             IconId = 65012,
             Cap = 2000,
+            EffectiveCap = 2000,
             QuantityHeld = 0,
         };
     }
@@ -164,6 +165,7 @@ public class Evaluator {
             Name = "(Generic Grand Company Seal)",
             IconId = 65004,
             Cap = 10000,
+            EffectiveCap = 10000,
             QuantityHeld = 0,
         };
     }
@@ -191,6 +193,7 @@ public class Evaluator {
                 IconId = item.Icon,
                 QuantityHeld = quantity,
                 Cap = cap,
+                EffectiveCap = subject.OverrideCap ?? cap,
                 LimitedQuantityHeld = (uint)InventoryManager.Instance()->GetWeeklyAcquiredTomestoneCount(),
                 LimitedCap = weeklyTomestoneLimit,
             };
@@ -202,45 +205,44 @@ public class Evaluator {
             IconId = item.Icon,
             QuantityHeld = quantity,
             Cap = cap,
+            EffectiveCap = subject.OverrideCap ?? cap,
         };
     }
 }
 
 public record SubjectDetails {
     public required string Name;
-    public string? Alias;
     public required uint IconId;
     public required uint Cap;
     public required uint QuantityHeld;
     public uint? LimitedCap;
     public uint? LimitedQuantityHeld;
 
+    public string? Alias;
+    public required uint EffectiveCap;
+
     public decimal QuantityHeldPercentage {
         get {
-            if (Cap is not 0)
-                return (decimal)QuantityHeld * 100 / Cap;
+            if (EffectiveCap is not 0)
+                return (decimal)QuantityHeld * 100 / EffectiveCap;
             return 0;
         }
     }
 
-    public uint QuantityMissing => QuantityHeld > Cap ? 0 : Cap - QuantityHeld;
+    public uint QuantityMissing => QuantityHeld > EffectiveCap ? 0 : EffectiveCap - QuantityHeld;
 
     public decimal? LimitedQuantityHeldPercentage {
         get {
-            if (LimitedCap is { } limitedCap and not 0 && LimitedQuantityHeld is { } limitedQuantityHeld) {
+            if (LimitedCap is { } limitedCap and not 0 && LimitedQuantityHeld is { } limitedQuantityHeld)
                 return (decimal)limitedQuantityHeld * 100 / limitedCap;
-            }
             return null;
         }
     }
 
     public uint? LimitedQuantityMissing {
         get {
-            if (LimitedCap is { } limitedCap && LimitedQuantityHeld is { } limitedQuantityHeld) {
-                if (limitedQuantityHeld > limitedCap)
-                    return 0;
-                return limitedCap - limitedQuantityHeld;
-            }
+            if (LimitedCap is { } limitedCap && LimitedQuantityHeld is { } limitedQuantityHeld)
+                return limitedQuantityHeld > limitedCap ? 0 : limitedCap - limitedQuantityHeld;
             return null;
         }
     }
