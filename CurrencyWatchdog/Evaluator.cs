@@ -217,8 +217,6 @@ public record SubjectDetails {
 
     public decimal QuantityHeldPercentage {
         get {
-            if (QuantityHeld > Cap)
-                return 100;
             if (Cap is not 0)
                 return (decimal)QuantityHeld * 100 / Cap;
             return 0;
@@ -230,8 +228,6 @@ public record SubjectDetails {
     public decimal? LimitedQuantityHeldPercentage {
         get {
             if (LimitedCap is { } limitedCap and not 0 && LimitedQuantityHeld is { } limitedQuantityHeld) {
-                if (limitedQuantityHeld > limitedCap)
-                    return 100;
                 return (decimal)limitedQuantityHeld * 100 / limitedCap;
             }
             return null;
