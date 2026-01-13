@@ -4,12 +4,19 @@ using System;
 namespace CurrencyWatchdog;
 
 public sealed class ZoneWatcher : IDisposable {
-    private ChangeType? waitType;
+    private bool waiting;
+    private bool waitingForLoginZone;
+    private bool waitingForTerritoryZone;
+
+    public LoginStateType LoginState;
 
     public event Action<ChangeType>? OnChange;
 
     public ZoneWatcher() {
+        LoginState = Service.ClientState.IsLoggedIn ? LoginStateType.Complete : LoginStateType.Zoning;
+
         Service.ClientState.Login += OnLogin;
+        Service.ClientState.Logout += OnLogout;
         Service.ClientState.TerritoryChanged += OnTerritoryChanged;
     }
 
@@ -25,19 +32,34 @@ public sealed class ZoneWatcher : IDisposable {
         Notify(ChangeType.Login);
 
         if (IsZoning()) {
-            StartWait(ChangeType.LoginZoned);
+            LoginState = LoginStateType.Zoning;
+            waitingForLoginZone = true;
+            StartWait();
         } else {
+            LoginState = LoginStateType.Complete;
             Notify(ChangeType.LoginZoned);
         }
+    }
+
+    private void OnLogout(int type, int code) {
+        LoginState = LoginStateType.None;
     }
 
     private void OnTerritoryChanged(ushort id) {
         Notify(ChangeType.TerritoryChange);
 
         if (IsZoning()) {
-            StartWait(ChangeType.TerritoryChangeZoned);
+            waitingForTerritoryZone = true;
+            StartWait();
         } else {
             Notify(ChangeType.TerritoryChangeZoned);
+        }
+    }
+
+    private void StartWait() {
+        if (!waiting) {
+            waiting = true;
+            Service.Condition.ConditionChange += OnConditionChange;
         }
     }
 
@@ -46,19 +68,27 @@ public sealed class ZoneWatcher : IDisposable {
             CompleteWait();
     }
 
-    private void StartWait(ChangeType type) {
-        if (waitType is null) {
-            waitType = type;
-            Service.Condition.ConditionChange += OnConditionChange;
-        }
-    }
-
     private void CompleteWait() {
-        if (waitType is { } type) {
-            waitType = null;
-            Notify(type);
+        var isResolving = false;
+
+        if (waitingForLoginZone) {
+            LoginState = LoginStateType.Resolving;
+            isResolving = true;
+
+            waitingForLoginZone = false;
+            Notify(ChangeType.LoginZoned);
         }
+
+        if (waitingForTerritoryZone) {
+            waitingForTerritoryZone = false;
+            Notify(ChangeType.TerritoryChangeZoned);
+        }
+
+        if (isResolving)
+            LoginState = LoginStateType.Complete;
+
         Service.Condition.ConditionChange -= OnConditionChange;
+        waiting = false;
     }
 
     private void Notify(ChangeType type) {
@@ -70,5 +100,12 @@ public sealed class ZoneWatcher : IDisposable {
         LoginZoned,
         TerritoryChange,
         TerritoryChangeZoned,
+    }
+
+    public enum LoginStateType {
+        None,
+        Zoning,
+        Resolving,
+        Complete,
     }
 }

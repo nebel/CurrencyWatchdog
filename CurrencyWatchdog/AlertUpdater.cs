@@ -6,14 +6,12 @@ using System.Linq;
 namespace CurrencyWatchdog;
 
 public sealed class AlertUpdater : IDisposable {
-    private static readonly AlertComparer AlertComparer = new();
-
     private readonly Evaluator evaluator;
     private readonly InventoryWatcher inventoryWatcher;
     private readonly ZoneWatcher zoneWatcher;
 
-    private AlertId[] currentChatAlertIds = [];
-    private Alert[] currentPanelAlerts = [];
+    private readonly ChatUpdater chatUpdater;
+    private readonly OverlayUpdater _overlayUpdater;
 
     private bool Enabled {
         get;
@@ -36,6 +34,9 @@ public sealed class AlertUpdater : IDisposable {
         inventoryWatcher = new InventoryWatcher();
         zoneWatcher = new ZoneWatcher();
 
+        chatUpdater = new ChatUpdater(zoneWatcher);
+        _overlayUpdater = new OverlayUpdater();
+
         Plugin.ConfigManager.OnChange += OnConfigChange;
     }
 
@@ -54,7 +55,7 @@ public sealed class AlertUpdater : IDisposable {
 
         Plugin.Overlay.UpdateConfig(config);
 
-        CheckAlertState(Reason.ConfigChange, OverlayRedrawMode.ForceRedraw, ChatAlertMode.Suppress);
+        CheckAlertState(UpdateReason.ConfigChange);
     }
 
     private void OnZoneChange(ZoneWatcher.ChangeType zoneType) {
@@ -62,16 +63,16 @@ public sealed class AlertUpdater : IDisposable {
 
         switch (zoneType) {
             case ZoneWatcher.ChangeType.Login:
-                CheckAlertState(Reason.Login, OverlayRedrawMode.ForceRedraw, ChatAlertMode.Suppress);
+                CheckAlertState(UpdateReason.Login);
                 return;
             case ZoneWatcher.ChangeType.LoginZoned:
-                CheckAlertState(Reason.LoginZoned, OverlayRedrawMode.Skip, GetChatAlertMode(Plugin.Config.ChatConfig.LoginAction));
+                CheckAlertState(UpdateReason.LoginZoned);
                 return;
             case ZoneWatcher.ChangeType.TerritoryChange:
                 // Do nothing, wait for zoned
                 return;
             case ZoneWatcher.ChangeType.TerritoryChangeZoned:
-                CheckAlertState(Reason.TerritoryChangeZoned, OverlayRedrawMode.Skip, GetChatAlertMode(Plugin.Config.ChatConfig.ZoneAction));
+                CheckAlertState(UpdateReason.TerritoryChangeZoned);
                 return;
             default:
                 throw new ArgumentOutOfRangeException($"Unknown ZoneWatcher.ChangeType: {zoneType}");
@@ -79,26 +80,26 @@ public sealed class AlertUpdater : IDisposable {
     }
 
     private void OnInventoryChange(InventoryWatcher.ChangeType changeType) {
-        var reason = changeType == InventoryWatcher.ChangeType.Inventory
-            ? Reason.InventoryChange
-            : Reason.CurrencyManagerChange;
+        // Service.Log.Warning($"Inventory change detected [{changeType}] ({Service.ClientState.IsLoggedIn}/{Service.PlayerState.IsLoaded})");
 
-        CheckAlertState(reason, OverlayRedrawMode.RedrawIfChanged, GetChatAlertMode(Plugin.Config.ChatConfig.AlertUpdateAction));
+        var reason = changeType == InventoryWatcher.ChangeType.Inventory
+            ? UpdateReason.InventoryChange
+            : UpdateReason.CurrencyManagerChange;
+
+        CheckAlertState(reason);
     }
 
     public void ResendActiveChatAlerts() {
-        CheckAlertState(Reason.DebugResendAlerts, OverlayRedrawMode.Skip, ChatAlertMode.SendAll);
+        CheckAlertState(UpdateReason.DebugResendAlerts);
     }
 
     private void ResetAll() {
-        if (currentPanelAlerts.Length > 0)
-            Plugin.Overlay.UpdateNodes([]);
-        currentPanelAlerts = [];
-        currentChatAlertIds = [];
+        chatUpdater.Reset();
+        _overlayUpdater.Reset();
     }
 
-    private void CheckAlertState(Reason reason, OverlayRedrawMode overlayRedrawMode, ChatAlertMode chatAlertMode) {
-        // Service.Log.Warning($"Checking alerts [{reason}] (overlay:{overlayRedrawMode} chat:{chatAlertMode})");
+    private void CheckAlertState(UpdateReason reason) {
+        // Service.Log.Warning($"Checking alerts [{reason}]");
 
         if (!Service.ClientState.IsLoggedIn || !Service.PlayerState.IsLoaded) {
             // Service.Log.Info("  Resetting alerts (not logged in)");
@@ -108,77 +109,162 @@ public sealed class AlertUpdater : IDisposable {
 
         var (panelAlerts, chatAlerts) = evaluator.Evaluate(Plugin.Config.Burdens);
 
-        // Chat
+        chatUpdater.Update(reason, chatAlerts);
+        _overlayUpdater.Update(reason, panelAlerts);
+    }
+}
 
+public enum UpdateReason {
+    ConfigChange,
+    InventoryChange,
+    CurrencyManagerChange,
+    Login,
+    LoginZoned,
+    TerritoryChangeZoned,
+    DebugResendAlerts,
+}
+
+public class ChatUpdater(ZoneWatcher zoneWatcher) {
+    private AlertId[] currentChatAlertIds = [];
+
+    public void Update(UpdateReason reason, List<Alert> alerts) {
         var newChatAlerts = new List<Alert>();
-        foreach (var alert in chatAlerts) {
+        foreach (var alert in alerts) {
             if (!currentChatAlertIds.Contains(alert.AlertId)) {
                 newChatAlerts.Add(alert);
             }
         }
-        currentChatAlertIds = chatAlerts.Select(a => a.AlertId).ToArray();
+        currentChatAlertIds = alerts.Select(a => a.AlertId).ToArray();
 
-        if (chatAlertMode == ChatAlertMode.SendAll)
-            Chat.SendChatAlerts(chatAlerts);
-        else if (chatAlertMode == ChatAlertMode.SendNew)
+        var notifyMode = GetNotifyMode(reason);
+        // Service.Log.Info($"  Chat: {notifyMode}");
+
+        if (notifyMode == NotifyMode.SendAll)
+            Chat.SendChatAlerts(alerts);
+        else if (notifyMode == NotifyMode.SendNew)
             Chat.SendChatAlerts(newChatAlerts);
+    }
 
-        // Panels
+    public void Reset() {
+        currentChatAlertIds = [];
+    }
 
-        if (overlayRedrawMode != OverlayRedrawMode.Skip) {
-            var redraw = overlayRedrawMode == OverlayRedrawMode.ForceRedraw;
+    private NotifyMode GetNotifyMode(UpdateReason reason) {
+        switch (reason) {
+            case UpdateReason.ConfigChange:
+                return NotifyMode.Suppress;
 
-            if (!redraw && panelAlerts.Count != currentPanelAlerts.Length)
-                redraw = true;
+            case UpdateReason.InventoryChange:
+            case UpdateReason.CurrencyManagerChange:
+                if (zoneWatcher.LoginState != ZoneWatcher.LoginStateType.Complete)
+                    return NotifyMode.Suppress;
+                return FromUpdateAction(Plugin.Config.ChatConfig.AlertUpdateAction);
 
-            if (!redraw && !panelAlerts.SequenceEqual(currentPanelAlerts, AlertComparer))
-                redraw = true;
+            case UpdateReason.Login:
+                return NotifyMode.Suppress;
 
-            // Service.Log.Info($"  Eval {Plugin.Config.Burdens.Count} burdens -> {panelAlerts.Count} panels (redraw:{redraw})");
+            case UpdateReason.LoginZoned:
+                return FromZoneAction(Plugin.Config.ChatConfig.LoginAction);
 
-            if (redraw) {
-                currentPanelAlerts = panelAlerts.ToArray();
-                Plugin.Overlay.UpdateNodes(panelAlerts);
-            }
+            case UpdateReason.TerritoryChangeZoned:
+                if (zoneWatcher.LoginState != ZoneWatcher.LoginStateType.Complete)
+                    return NotifyMode.Suppress;
+                return FromZoneAction(Plugin.Config.ChatConfig.ZoneAction);
+
+            case UpdateReason.DebugResendAlerts:
+                return NotifyMode.SendAll;
+
+            default:
+                throw new ArgumentOutOfRangeException($"Unknown UpdateReason: {reason}");
         }
     }
 
-    private static ChatAlertMode GetChatAlertMode(ChatAlertUpdateAction action) {
-        return Plugin.Config.ChatConfig.AlertUpdateAction switch {
-            ChatAlertUpdateAction.None => ChatAlertMode.Suppress,
-            ChatAlertUpdateAction.All => ChatAlertMode.SendAll,
-            ChatAlertUpdateAction.New => ChatAlertMode.SendNew,
-            _ => throw new ArgumentOutOfRangeException($"Unknown ChatAlertUpdateAction: {action}"),
-        };
-    }
-
-    private static ChatAlertMode GetChatAlertMode(ChatAlertZoneAction action) {
-        return Plugin.Config.ChatConfig.ZoneAction switch {
-            ChatAlertZoneAction.None => ChatAlertMode.Suppress,
-            ChatAlertZoneAction.All => ChatAlertMode.SendAll,
+    private static NotifyMode FromZoneAction(ChatAlertZoneAction action) {
+        return action switch {
+            ChatAlertZoneAction.None => NotifyMode.Suppress,
+            ChatAlertZoneAction.All => NotifyMode.SendAll,
             _ => throw new ArgumentOutOfRangeException($"Unknown ChatAlertZoneAction: {action}"),
         };
     }
 
-    private enum Reason {
-        ConfigChange,
-        InventoryChange,
-        CurrencyManagerChange,
-        Login,
-        LoginZoned,
-        TerritoryChangeZoned,
-        DebugResendAlerts,
+    private static NotifyMode FromUpdateAction(ChatAlertUpdateAction action) {
+        return action switch {
+            ChatAlertUpdateAction.None => NotifyMode.Suppress,
+            ChatAlertUpdateAction.All => NotifyMode.SendAll,
+            ChatAlertUpdateAction.New => NotifyMode.SendNew,
+            _ => throw new ArgumentOutOfRangeException($"Unknown ChatAlertUpdateAction: {action}"),
+        };
     }
 
-    private enum OverlayRedrawMode {
-        Skip,
-        ForceRedraw,
-        RedrawIfChanged,
-    }
-
-    private enum ChatAlertMode {
+    private enum NotifyMode {
         SendAll,
         SendNew,
         Suppress,
+    }
+}
+
+public class OverlayUpdater {
+    private static readonly AlertComparer AlertComparer = new();
+
+    private Alert[] currentPanelAlerts = [];
+
+    public void Update(UpdateReason reason, List<Alert> alerts) {
+        var redrawMode = GetRedrawMode(reason);
+        // Service.Log.Info($"  Overlay: {redrawMode}");
+
+        if (redrawMode == RedrawMode.Skip) return;
+
+        var redraw = redrawMode == RedrawMode.ForceRedraw;
+
+        if (!redraw && alerts.Count != currentPanelAlerts.Length)
+            redraw = true;
+
+        if (!redraw && !alerts.SequenceEqual(currentPanelAlerts, AlertComparer))
+            redraw = true;
+
+        // Service.Log.Info($"    Eval {Plugin.Config.Burdens.Count} burdens -> {alerts.Count} panels (redraw:{redraw})");
+
+        if (redraw) {
+            currentPanelAlerts = alerts.ToArray();
+            Plugin.Overlay.UpdateNodes(alerts);
+        }
+    }
+
+    public void Reset() {
+        if (currentPanelAlerts.Length > 0)
+            Plugin.Overlay.UpdateNodes([]);
+        currentPanelAlerts = [];
+    }
+
+    private RedrawMode GetRedrawMode(UpdateReason reason) {
+        switch (reason) {
+            case UpdateReason.ConfigChange:
+                return RedrawMode.ForceRedraw;
+
+            case UpdateReason.InventoryChange:
+            case UpdateReason.CurrencyManagerChange:
+                return RedrawMode.RedrawIfChanged;
+
+            case UpdateReason.Login:
+                return RedrawMode.ForceRedraw;
+
+            case UpdateReason.LoginZoned:
+                return RedrawMode.Skip;
+
+            case UpdateReason.TerritoryChangeZoned:
+                return RedrawMode.Skip;
+
+            case UpdateReason.DebugResendAlerts:
+                return RedrawMode.Skip;
+
+            default:
+                throw new ArgumentOutOfRangeException($"Unknown UpdateReason: {reason}");
+        }
+    }
+
+    private enum RedrawMode {
+        Skip,
+        ForceRedraw,
+        RedrawIfChanged,
     }
 }
