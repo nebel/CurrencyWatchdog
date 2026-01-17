@@ -11,7 +11,7 @@ public sealed class AlertUpdater : IDisposable {
     private readonly ZoneWatcher zoneWatcher;
 
     private readonly ChatUpdater chatUpdater;
-    private readonly OverlayUpdater _overlayUpdater;
+    private readonly OverlayUpdater overlayUpdater;
 
     private bool Enabled {
         get;
@@ -35,7 +35,7 @@ public sealed class AlertUpdater : IDisposable {
         zoneWatcher = new ZoneWatcher();
 
         chatUpdater = new ChatUpdater(zoneWatcher);
-        _overlayUpdater = new OverlayUpdater();
+        overlayUpdater = new OverlayUpdater();
 
         Plugin.ConfigManager.OnChange += OnConfigChange;
     }
@@ -95,7 +95,7 @@ public sealed class AlertUpdater : IDisposable {
 
     private void ResetAll() {
         chatUpdater.Reset();
-        _overlayUpdater.Reset();
+        overlayUpdater.Reset();
     }
 
     private void CheckAlertState(UpdateReason reason) {
@@ -110,7 +110,7 @@ public sealed class AlertUpdater : IDisposable {
         var (panelAlerts, chatAlerts) = evaluator.Evaluate(Plugin.Config.Burdens);
 
         chatUpdater.Update(reason, chatAlerts);
-        _overlayUpdater.Update(reason, panelAlerts);
+        overlayUpdater.Update(reason, panelAlerts);
     }
 }
 
