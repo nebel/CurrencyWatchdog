@@ -1,6 +1,6 @@
 using CurrencyWatchdog.Configuration;
 using Dalamud.Game.ClientState.Conditions;
-using KamiToolKit.Classes;
+using KamiToolKit.Enums;
 using KamiToolKit.Overlay;
 using System.Collections.Generic;
 using System.Numerics;

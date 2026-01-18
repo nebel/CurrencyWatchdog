@@ -100,7 +100,7 @@ public class CurrencyNode : SimpleOverlayNode {
             : new Vector2(textPadding.Left, 0.0f);
 
         labelNode.Position = labelPosition;
-        labelNode.SeString = payload.LabelTemplate;
+        labelNode.String = payload.LabelTemplate;
         labelNode.TextColor = payload.LabelColor;
         labelNode.TextOutlineColor = payload.LabelOutlineColor;
 
@@ -112,7 +112,7 @@ public class CurrencyNode : SimpleOverlayNode {
         iconImageNode.IconId = payload.Icon;
 
         quantityNode.Position = iconPosition + config.QuantityNodeOffset;
-        quantityNode.SeString = payload.QuantityTemplate;
+        quantityNode.String = payload.QuantityTemplate;
         quantityNode.TextColor = payload.QuantityColor;
         quantityNode.TextOutlineColor = payload.QuantityOutlineColor;
 
