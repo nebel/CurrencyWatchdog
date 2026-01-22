@@ -25,7 +25,7 @@ public sealed class LeveWatcher : IDisposable {
         Service.GameInterop.InitializeFromAttributes(this);
 
         if (setLeveAllowanceHook is null) {
-            Service.Log.Warning("Unable to find signature for leve allow change");
+            Service.Log.Warning("Unable to find signature for leve allowance change");
             return;
         }
 
