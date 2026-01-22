@@ -106,7 +106,25 @@ public class Evaluator {
             SubjectType.PreviousGatherersScrip => GetItemDetails(subject with { Id = PreviousGatherersScripId }),
             SubjectType.CurrentCraftersScrip => GetItemDetails(subject with { Id = CurrentCraftersScripId }),
             SubjectType.CurrentGatherersScrip => GetItemDetails(subject with { Id = CurrentGatherersScripId }),
+            SubjectType.LeveAllowance => GetLeveDetails(subject),
             _ => throw new ArgumentOutOfRangeException($"Unsupported subject type: {subject.Type}"),
+        };
+    }
+
+    private unsafe SubjectDetails GetLeveDetails(Subject subject) {
+        var held = 0u;
+        var qm = QuestManager.Instance();
+        if (qm is not null) {
+            held = qm->NumLeveAllowances;
+        }
+
+        return new SubjectDetails {
+            Name = "Leve Allowance",
+            Alias = subject.Alias,
+            IconId = 61422,
+            Cap = 100,
+            EffectiveCap = subject.OverrideCap ?? 100,
+            QuantityHeld = held,
         };
     }
 

@@ -214,6 +214,8 @@ public enum SubjectType {
     CurrentCraftersScrip,
     [Display(Name = "Current Gatherers' Scrip")]
     CurrentGatherersScrip,
+    [Display(Name = "Leve Allowance")]
+    LeveAllowance,
 }
 
 [Serializable]

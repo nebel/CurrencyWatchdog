@@ -26,7 +26,7 @@ public class PresetSelectorWindow : Dalamud.Interface.Windowing.Window {
     private const float PresetRowHeight = 40;
 
     public PresetSelectorWindow() : base("Preset Selector", ImGuiWindowFlags.NoCollapse) {
-        var size = new Vector2(350, 500);
+        var size = new Vector2(350, 520);
         SizeConstraints = new WindowSizeConstraints {
             MinimumSize = size,
             MaximumSize = new Vector2(float.PositiveInfinity),

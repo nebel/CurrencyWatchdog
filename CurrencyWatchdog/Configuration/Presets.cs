@@ -48,6 +48,12 @@ public static class Presets {
             Subjects = Enumerable.Range(2, 18).Select(Item).ToList(), // Fire Shard ... Water Cluster
             Rules = [PercentRule(90)],
         },
+        ["LeveAllowances"] = new Burden {
+            Subjects = [Special(SubjectType.LeveAllowance)],
+            Rules = [new Rule {
+                Conds = [new Cond(new Metric(MetricType.QuantityHeld), Operator.GreaterThanOrEqualTo, new Metric(MetricType.Cap))],
+            }],
+        },
     };
 
     private static Subject Item(int itemId) => new() { Id = (uint)itemId };

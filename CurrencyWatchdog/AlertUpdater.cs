@@ -9,6 +9,7 @@ public sealed class AlertUpdater : IDisposable {
     private readonly Evaluator evaluator;
     private readonly InventoryWatcher inventoryWatcher;
     private readonly ZoneWatcher zoneWatcher;
+    private readonly LeveWatcher leveWatcher;
 
     private readonly ChatUpdater chatUpdater;
     private readonly OverlayUpdater overlayUpdater;
@@ -22,9 +23,11 @@ public sealed class AlertUpdater : IDisposable {
             if (value) {
                 inventoryWatcher.OnChange += OnInventoryChange;
                 zoneWatcher.OnChange += OnZoneChange;
+                leveWatcher.OnChange += OnLeveChange;
             } else {
                 inventoryWatcher.OnChange -= OnInventoryChange;
                 zoneWatcher.OnChange -= OnZoneChange;
+                leveWatcher.OnChange -= OnLeveChange;
             }
         }
     } = false;
@@ -33,6 +36,7 @@ public sealed class AlertUpdater : IDisposable {
         this.evaluator = evaluator;
         inventoryWatcher = new InventoryWatcher();
         zoneWatcher = new ZoneWatcher();
+        leveWatcher = new LeveWatcher();
 
         chatUpdater = new ChatUpdater(zoneWatcher);
         overlayUpdater = new OverlayUpdater();
@@ -44,6 +48,7 @@ public sealed class AlertUpdater : IDisposable {
         Enabled = false;
         inventoryWatcher.Dispose();
         zoneWatcher.Dispose();
+        leveWatcher.Dispose();
     }
 
     private void OnConfigChange(Config config) {
@@ -90,6 +95,11 @@ public sealed class AlertUpdater : IDisposable {
         CheckAlertState(reason);
     }
 
+
+    private void OnLeveChange() {
+        CheckAlertState(UpdateReason.LeveChange);
+    }
+
     public void ResendActiveChatAlerts() {
         CheckAlertState(UpdateReason.DebugResendAlerts);
     }
@@ -119,6 +129,7 @@ public enum UpdateReason {
     ConfigChange,
     InventoryChange,
     CurrencyManagerChange,
+    LeveChange,
     Login,
     LoginZoned,
     TerritoryChangeZoned,
@@ -157,6 +168,7 @@ public class ChatUpdater(ZoneWatcher zoneWatcher) {
 
             case UpdateReason.InventoryChange:
             case UpdateReason.CurrencyManagerChange:
+            case UpdateReason.LeveChange:
                 if (zoneWatcher.LoginState != ZoneWatcher.LoginStateType.Complete)
                     return NotifyMode.Suppress;
                 return FromUpdateAction(Plugin.Config.ChatConfig.AlertUpdateAction);
@@ -244,6 +256,7 @@ public class OverlayUpdater {
 
             case UpdateReason.InventoryChange:
             case UpdateReason.CurrencyManagerChange:
+            case UpdateReason.LeveChange:
                 return RedrawMode.RedrawIfChanged;
 
             case UpdateReason.Login:

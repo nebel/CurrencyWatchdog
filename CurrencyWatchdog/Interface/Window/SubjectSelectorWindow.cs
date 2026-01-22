@@ -30,7 +30,7 @@ public class SubjectSelectorWindow : Dalamud.Interface.Windowing.Window {
     private const float ItemRowHeight = 25;
 
     public SubjectSelectorWindow() : base("Subject Selector", ImGuiWindowFlags.NoCollapse) {
-        var size = new Vector2(350, 500);
+        var size = new Vector2(350, 520);
         SizeConstraints = new WindowSizeConstraints {
             MinimumSize = size,
             MaximumSize = new Vector2(float.PositiveInfinity),
