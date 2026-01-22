@@ -13,12 +13,12 @@ public sealed class LeveWatcher : IDisposable {
     private delegate nint SetLeveAllowanceDelegate(nint arg);
 
     private unsafe nint SetLeveAllowanceDetour(nint arg) {
-        var leaveCount = *(byte*)(arg + 4);
-        Service.Log.Debug($"Leve allowance set to {leaveCount}");
+        var origResult = setLeveAllowanceHook!.Original(arg);
 
+        Service.Log.Debug($"Leve allowance set to {*(byte*)(arg + 4)}");
         OnChange?.Invoke();
 
-        return setLeveAllowanceHook!.Original(arg);
+        return origResult;
     }
 
     public LeveWatcher() {
