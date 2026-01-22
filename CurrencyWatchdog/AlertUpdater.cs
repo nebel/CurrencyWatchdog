@@ -43,6 +43,7 @@ public sealed class AlertUpdater : IDisposable {
     public void Dispose() {
         Enabled = false;
         inventoryWatcher.Dispose();
+        zoneWatcher.Dispose();
     }
 
     private void OnConfigChange(Config config) {
