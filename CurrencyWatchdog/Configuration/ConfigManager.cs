@@ -25,6 +25,11 @@ public class ConfigManager {
         OnChange?.Invoke(Current);
     }
 
+    public void LoadObject(Config config) {
+        Current = config;
+        Save();
+    }
+
     public void FullReset() {
         Current = storageContext.GetDefault();
         OnChange?.Invoke(Current);
@@ -34,4 +39,5 @@ public class ConfigManager {
         storageContext.Save(storage, Current);
         OnChange?.Invoke(Current);
     }
+
 }
