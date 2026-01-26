@@ -17,7 +17,7 @@ public class HelpTab {
         if (ImGui.CollapsingHeader("Burdens, subjects, rules and conditions")) {
             ImGuiEx.ConfigHeader("Burdens");
 
-            ImGui.TextWrapped("A burdens is a group of tracked items with a shared configuration. It consists of subjects, which are the items " +
+            ImGui.TextWrapped("A burden is a group of tracked items with a shared configuration. It consists of subjects, which are the items " +
                               "monitored, and rules which are used to determine whether or not an alert is shown.");
 
             ImGuiEx.ConfigHeader("Subjects");
