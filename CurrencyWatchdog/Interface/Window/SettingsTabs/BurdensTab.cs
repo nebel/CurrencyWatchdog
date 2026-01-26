@@ -336,14 +336,19 @@ public class BurdensTab(ConfigWindow window) {
 
         if (subjectDetails != null) {
             ImGui.SameLine();
-            ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeld.ToString(Utils.UintDisplayFormat)}");
-            ImGui.SameLine();
-            ImGui.TextColored(typeColor, "/");
-            ImGui.SameLine();
-            if (subject.OverrideCap is not null) {
-                ImGui.TextColored(overrideCapColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)} *");
+            if (ImGui.GetIO().KeyShift) {
+                ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeldPercentage.ToString(Utils.PercentDisplayFormat)}%"
+                                             + $"  |  {subjectDetails.QuantityMissing.ToString(Utils.UintDisplayFormat)} missing");
             } else {
-                ImGui.TextColored(typeColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)}");
+                ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeld.ToString(Utils.UintDisplayFormat)}");
+                ImGui.SameLine();
+                ImGui.TextColored(typeColor, "/");
+                ImGui.SameLine();
+                if (subject.OverrideCap is not null) {
+                    ImGui.TextColored(overrideCapColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)} *");
+                } else {
+                    ImGui.TextColored(typeColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)}");
+                }
             }
         } else {
             if (subject.OverrideCap is { } overrideCap) {
