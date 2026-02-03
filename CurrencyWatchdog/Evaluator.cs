@@ -191,8 +191,8 @@ public class Evaluator {
         };
     }
 
-    private static unsafe uint GetCount(uint itemId) {
-        return InventoryManager.Instance()->GetInventoryItemCount(itemId) is var count and >= 0 ? (uint)count : 0;
+    private static unsafe uint GetCount(uint itemId, bool isHq) {
+        return InventoryManager.Instance()->GetInventoryItemCount(itemId, isHq) is var count and >= 0 ? (uint)count : 0;
     }
 
     private unsafe SubjectDetails? GetItemDetails(Subject subject) {
@@ -204,7 +204,12 @@ public class Evaluator {
             return null;
 
         var name = item.Name.ToString();
-        var quantity = GetCount(itemId);
+        var quantity = subject.Quality switch {
+            SubjectQuality.Any when item.CanBeHq => GetCount(itemId, false) + GetCount(itemId, true),
+            SubjectQuality.Any or SubjectQuality.Normal => GetCount(itemId, false),
+            SubjectQuality.High => GetCount(itemId, true),
+            _ => throw new ArgumentOutOfRangeException($"Unsupported subject quality: {subject.Quality}")
+        };
         var cap = item.StackSize;
 
         if (itemId == limitedTomestoneId) {

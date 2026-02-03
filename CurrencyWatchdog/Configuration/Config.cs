@@ -118,6 +118,7 @@ public record Subject {
     public SubjectType Type { get; set; } = SubjectType.Item;
     public uint Id { get; set; }
     public string? Alias { get; set; }
+    public SubjectQuality Quality { get; set; } = SubjectQuality.Any;
     public uint? OverrideCap { get; set; }
     public bool Enabled { get; set; } = true;
 }
@@ -269,4 +270,14 @@ public enum FontOutlineType {
 public enum PanelSizingType {
     Auto,
     Fixed,
+}
+
+[Serializable]
+public enum SubjectQuality {
+    [Display(Name = "Any")]
+    Any,
+    [Display(Name = "NQ")]
+    Normal,
+    [Display(Name = "HQ")]
+    High,
 }

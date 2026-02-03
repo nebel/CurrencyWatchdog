@@ -9,6 +9,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -295,6 +296,7 @@ public class BurdensTab(ConfigWindow window) {
         var iconTint = subject.Enabled ? Vector4.One : new Vector4(1, 1, 1, 0.5f);
         var fadeMultiplier = subject.Enabled ? 1f : 0.3f;
         var typeColor = ImGuiEx.GetFadedColor(ImGuiCol.TextDisabled, fadeMultiplier);
+        var qualityColor = ImGuiEx.GetFadedColor(ImGuiColors.HealerGreen, fadeMultiplier);
         var nameColor = ImGuiEx.GetFadedColor(ImGuiCol.Text, fadeMultiplier);
         var aliasColor = ImGuiEx.GetFadedColor(ImGuiColors.DalamudViolet, fadeMultiplier);
         var overrideCapColor = ImGuiEx.GetFadedColor(ImGuiColors.ParsedGold, fadeMultiplier);
@@ -327,6 +329,12 @@ public class BurdensTab(ConfigWindow window) {
         } else {
             subjectName = $"ID={subject.Id}";
         }
+
+        if (subject.Quality != SubjectQuality.Any) {
+            ImGui.TextColored(qualityColor, $"{subject.Quality.GetDisplayName()}");
+            ImGui.SameLine();
+        }
+
         ImGui.TextColored(nameColor, subjectName);
 
         if (subject.Alias is not null) {
@@ -419,6 +427,10 @@ public class BurdensTab(ConfigWindow window) {
         }
     }
 
+    private static bool CanBeHq(Subject subject) {
+        return Service.DataManager.Excel.GetSheet<Item>().GetRowOrDefault(subject.Id) is { CanBeHq: true };
+    }
+
     private void DrawSubjectCustomizePopup(Subject subject, string subjectTypeName, string subjectName, ref bool changed) {
         using var defaultStyle = ImRaii.DefaultStyle();
         using var popup = ImRaii.Popup(PopupEditSubject);
@@ -428,6 +440,16 @@ public class BurdensTab(ConfigWindow window) {
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
+
+        if (subject.Type == SubjectType.Item && (subject.Quality != SubjectQuality.Any || CanBeHq(subject))) {
+            ImGui.SetNextItemWidth(160 * ImGuiHelpers.GlobalScale);
+            ImGui.Text("Quality");
+            var quality = subject.Quality;
+            if (ImGuiEx.EnumCombo("Track items of quality...", ref quality)) {
+                subject.Quality = quality;
+                changed = true;
+            }
+        }
 
         ImGui.SetNextItemWidth(160 * ImGuiHelpers.GlobalScale);
         ImGui.Text("Alias");
