@@ -155,7 +155,7 @@ public class PresetSelectorWindow : Dalamud.Interface.Windowing.Window {
         var burdenDisplay = Utils.GetBurdenDisplay(preset.Burden);
         using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(4, 0))) {
             ImGui.TextDisabled("Preset");
-            if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(burdenDisplay.IconId)) is { } texture) {
+            if (burdenDisplay.Icon.GetTexture() is { } texture) {
                 using var wrap = texture.GetWrapOrEmpty();
                 ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(PresetRowHeight / 2, PresetRowHeight / 2));
                 ImGui.SameLine();

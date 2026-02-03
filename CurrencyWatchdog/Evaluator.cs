@@ -229,6 +229,7 @@ public class Evaluator {
             Name = name,
             Alias = subject.Alias,
             IconId = item.Icon,
+            UseHqIcon = item.CanBeHq && subject.UseHqIcon,
             QuantityHeld = quantity,
             Cap = cap,
             EffectiveCap = subject.OverrideCap ?? cap,
@@ -239,6 +240,8 @@ public class Evaluator {
 public record SubjectDetails {
     public required string Name;
     public required uint IconId;
+    public bool UseHqIcon;
+
     public required uint Cap;
     public required uint QuantityHeld;
     public uint? LimitedCap;

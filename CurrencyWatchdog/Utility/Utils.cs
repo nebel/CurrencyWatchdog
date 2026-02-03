@@ -8,11 +8,11 @@ public static class Utils {
     public const string DecimalDisplayFormat = "#,##0.#########";
     public const decimal CustomConstantMax = 999_999_999_999m;
 
-    public static (uint IconId, string Name) GetBurdenDisplay(Burden burden) {
-        var autoIcon = 60071u; // was: 61523u
+    public static (Icon Icon, string Name) GetBurdenDisplay(Burden burden) {
+        var autoIcon = new Icon(60071u); // was: 61523u
         var autoName = "(Unnamed)";
         if (burden.Subjects is [var subject, ..] && Plugin.Evaluator.GetDetails(subject) is { IconId: not 0 } itemDetails) {
-            autoIcon = itemDetails.IconId;
+            autoIcon = new Icon(itemDetails.IconId, itemDetails.UseHqIcon);
             autoName = itemDetails.Alias ?? itemDetails.Name;
         }
         if (burden.Subjects.Count > 1) {

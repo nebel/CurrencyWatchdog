@@ -1,4 +1,5 @@
 using CurrencyWatchdog.Configuration;
+using CurrencyWatchdog.Native.Parts;
 using Dalamud.Interface;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using KamiToolKit.Nodes;
@@ -10,7 +11,7 @@ namespace CurrencyWatchdog.Native;
 
 public class CurrencyNode : SimpleOverlayNode {
     private readonly BackgroundImageNode backdropNode;
-    private readonly IconImageNode iconImageNode;
+    private readonly HqIconImageNode hqIconImageNode;
     private readonly TextNode quantityNode;
     private readonly TextNode labelNode;
 
@@ -23,12 +24,11 @@ public class CurrencyNode : SimpleOverlayNode {
         };
         backdropNode.AttachNode(this);
 
-        iconImageNode = new IconImageNode {
-            IconId = 1,
+        hqIconImageNode = new HqIconImageNode {
             Size = new Vector2(36.0f, 36.0f),
             FitTexture = true,
         };
-        iconImageNode.AttachNode(this);
+        hqIconImageNode.AttachNode(this);
 
         quantityNode = new TextNode {
             BackgroundColor = Vector4.Zero,
@@ -76,7 +76,7 @@ public class CurrencyNode : SimpleOverlayNode {
         labelNode.FontSize = config.LabelFontSize;
         ApplyOutlineType(config.LabelFontOutline, labelNode);
 
-        iconImageNode.Size = iconSize;
+        hqIconImageNode.Size = iconSize;
 
         quantityNode.Size = iconSize;
         quantityNode.FontType = ToFontType(config.QuantityFont);
@@ -108,25 +108,25 @@ public class CurrencyNode : SimpleOverlayNode {
             ? Vector2.Zero
             : new Vector2(labelNode.Size.X + textPadding.Total, 0.0f);
 
-        iconImageNode.Position = iconPosition;
-        iconImageNode.IconId = payload.Icon;
+        hqIconImageNode.Position = iconPosition;
+        hqIconImageNode.SetIcon(payload.Icon);
 
         quantityNode.Position = iconPosition + config.QuantityNodeOffset;
         quantityNode.String = payload.QuantityTemplate;
         quantityNode.TextColor = payload.QuantityColor;
         quantityNode.TextOutlineColor = payload.QuantityOutlineColor;
 
-        var backdropSizeX = iconImageNode.Size.X
+        var backdropSizeX = hqIconImageNode.Size.X
                             + labelNode.Size.X
                             + textPadding.Left + textPadding.Right
                             + config.PanelPadding.Left + config.PanelPadding.Right;
-        var backdropSizeY = iconImageNode.Size.Y
+        var backdropSizeY = hqIconImageNode.Size.Y
                             + config.PanelPadding.Top + config.PanelPadding.Bottom;
         backdropNode.Size = new Vector2(backdropSizeX, backdropSizeY);
         backdropNode.Color = payload.BackdropColor;
     }
 
-    public Vector2 ContentSize => iconImageNode.Size with { X = iconImageNode.Size.X + labelNode.Size.X + currentTextPadding.Left + currentTextPadding.Right };
+    public Vector2 ContentSize => hqIconImageNode.Size with { X = hqIconImageNode.Size.X + labelNode.Size.X + currentTextPadding.Left + currentTextPadding.Right };
 
     private static FontType ToFontType(GameFont font) {
         return font switch {

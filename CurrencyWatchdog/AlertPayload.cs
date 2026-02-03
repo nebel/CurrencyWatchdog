@@ -30,7 +30,7 @@ public record ChatPayload {
 }
 
 public record PanelPayload {
-    public required uint Icon;
+    public required Icon Icon;
     public required string QuantityTemplate;
     public required Vector4 QuantityColor;
     public required Vector4 QuantityOutlineColor;
@@ -43,7 +43,7 @@ public record PanelPayload {
         var local = alert.ActiveRule.PanelConfig;
         var global = Plugin.Config.PanelConfig;
         return new PanelPayload {
-            Icon = alert.SubjectDetails.IconId,
+            Icon = new Icon(alert.SubjectDetails.IconId, alert.SubjectDetails.UseHqIcon),
             QuantityTemplate = RenderPlaceholders(alert, local?.QuantityTemplate ?? global.QuantityTemplate),
             QuantityColor = local?.QuantityColor ?? global.QuantityColor,
             QuantityOutlineColor = local?.QuantityOutlineColor ?? global.QuantityOutlineColor,

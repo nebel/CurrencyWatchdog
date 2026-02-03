@@ -129,7 +129,7 @@ public class BurdensTab(ConfigWindow window) {
             }
         }
 
-        var (iconId, label) = Utils.GetBurdenDisplay(burden);
+        var (icon, label) = Utils.GetBurdenDisplay(burden);
 
         using (var drag = burdenDragDrop.Drag(i)) {
             if (drag) ImGui.Text($"Reorder: {label}");
@@ -144,7 +144,7 @@ public class BurdensTab(ConfigWindow window) {
         ImGui.SetCursorPos(cursorPosition);
 
         using (ImRaii.Child("selectableChild", selectableSize, false, ImGuiWindowFlags.NoInputs)) {
-            if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(iconId)) is { } texture) {
+            if (icon.GetTexture() is { } texture) {
                 using var wrap = texture.GetWrapOrEmpty();
                 var tint = burden.Enabled ? Vector4.One : new Vector4(1, 1, 1, 0.5f);
                 ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(selectableSize.Y, selectableSize.Y), tintCol: tint);
@@ -320,7 +320,7 @@ public class BurdensTab(ConfigWindow window) {
 
         string subjectName;
         if (subjectDetails != null) {
-            if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(subjectDetails.IconId)) is { } texture) {
+            if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(subjectDetails.IconId, subjectDetails.UseHqIcon)) is { } texture) {
                 using var wrap = texture.GetWrapOrEmpty();
                 ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(rowHeight / 2, rowHeight / 2), tintCol: iconTint);
                 ImGui.SameLine();
@@ -441,13 +441,25 @@ public class BurdensTab(ConfigWindow window) {
         ImGui.Separator();
         ImGui.Spacing();
 
-        if (subject.Type == SubjectType.Item && (subject.Quality != SubjectQuality.Any || CanBeHq(subject))) {
-            ImGui.SetNextItemWidth(160 * ImGuiHelpers.GlobalScale);
+        var canBeHq = subject.Type == SubjectType.Item && CanBeHq(subject);
+        var canChangeQuality = canBeHq || subject.Quality != SubjectQuality.Any;
+        if (canBeHq || canChangeQuality) {
             ImGui.Text("Quality");
-            var quality = subject.Quality;
-            if (ImGuiEx.EnumCombo("Track items of quality...", ref quality)) {
-                subject.Quality = quality;
-                changed = true;
+            if (canChangeQuality) {
+                ImGui.SetNextItemWidth(160 * ImGuiHelpers.GlobalScale);
+                var quality = subject.Quality;
+                if (ImGuiEx.EnumCombo("Track items of quality...", ref quality)) {
+                    subject.Quality = quality;
+                    changed = true;
+                }
+            }
+            if (canBeHq) {
+                ImGui.SetNextItemWidth(160 * ImGuiHelpers.GlobalScale);
+                var useHqIcon = subject.UseHqIcon;
+                if (ImGui.Checkbox("Use HQ icon", ref useHqIcon)) {
+                    subject.UseHqIcon = useHqIcon;
+                    changed = true;
+                }
             }
         }
 

@@ -119,6 +119,7 @@ public record Subject {
     public uint Id { get; set; }
     public string? Alias { get; set; }
     public SubjectQuality Quality { get; set; } = SubjectQuality.Any;
+    public bool UseHqIcon { get; set; } = false;
     public uint? OverrideCap { get; set; }
     public bool Enabled { get; set; } = true;
 }
