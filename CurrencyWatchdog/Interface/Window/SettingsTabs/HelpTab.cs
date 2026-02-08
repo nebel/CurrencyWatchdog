@@ -102,6 +102,13 @@ public class HelpTab {
 
         ImGui.Spacing();
 
+        if (ImGui.CollapsingHeader("Hiding text")) {
+            ImGui.TextWrapped("To hide a text label, e.g. an item's name or quantity, just delete all text in the \"Format\" template string. This can be "
+                              + "done globally in \"Overlay Panels\" or for a specific burden by setting \"Customize Overlay Panel\" in each matching rule.");
+        }
+
+        ImGui.Spacing();
+
         if (ImGui.CollapsingHeader("Definition of \"cap\"")) {
             ImGui.TextWrapped("For currency items, the cap is the maximum number of such items that can be held at once on a single character (not " +
                               "including retainers). Generally speaking it should not be possible for \"Held\" to be greater than \"Cap\" for currency " +
