@@ -103,8 +103,9 @@ public class HelpTab {
         ImGui.Spacing();
 
         if (ImGui.CollapsingHeader("Hiding text")) {
-            ImGui.TextWrapped("To hide a text label, e.g. an item's name or quantity, just delete all text in the \"Format\" template string. This can be "
-                              + "done globally in \"Overlay Panels\" or for a specific burden by setting \"Customize Overlay Panel\" in each matching rule.");
+            ImGui.TextWrapped("To hide a text label (e.g. an item's name or quantity) just delete all text in the \"Format\" template string. This " +
+                              "can be done globally in \"Overlay Panels\" or for a specific burden by setting \"Customize Overlay Panel\" in each matching " +
+                              "rule.");
         }
 
         ImGui.Spacing();
@@ -126,7 +127,7 @@ public class HelpTab {
 
         if (ImGui.CollapsingHeader("Inputting exact values")) {
             ImGui.TextWrapped("When modifying settings, if a numeric input control is a slider and getting the exact value you desire is difficult, " +
-                              "double-clicking or holding Control and clicking will often allow you to input an exact value manually (and values outside" +
+                              "double-clicking or holding Control and clicking will often allow you to input an exact value manually (and values outside " +
                               "the default slider constraints may be allowed to a limited extent).");
         }
     }
