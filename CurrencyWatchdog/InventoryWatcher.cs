@@ -20,7 +20,7 @@ public sealed class InventoryWatcher : IDisposable {
     }
 
     private unsafe void OnSetItemData(CurrencyManager* thisPtr, sbyte specialId, uint itemId, uint maxCount, uint count, bool isUnlimited) {
-        setItemDataHook.Original.Invoke(thisPtr, specialId, itemId, maxCount, count, isUnlimited);
+        setItemDataHook.Original(thisPtr, specialId, itemId, maxCount, count, isUnlimited);
         OnChange?.Invoke(ChangeType.CurrencyManager);
     }
 

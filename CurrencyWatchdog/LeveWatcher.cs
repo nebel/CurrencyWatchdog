@@ -15,8 +15,12 @@ public sealed class LeveWatcher : IDisposable {
     private unsafe nint SetLeveAllowanceDetour(nint arg) {
         var origResult = setLeveAllowanceHook!.Original(arg);
 
-        Service.Log.Debug($"Leve allowance set to {*(byte*)(arg + 4)}");
-        OnChange?.Invoke();
+        try {
+            Service.Log.Debug($"Leve allowance set to {*(byte*)(arg + 4)}");
+            OnChange?.Invoke();
+        } catch (Exception e) {
+            Service.Log.Error($"Caught exception while invoking ${nameof(LeveWatcher)}.${nameof(OnChange)}", e);
+        }
 
         return origResult;
     }
