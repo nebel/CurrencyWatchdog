@@ -86,7 +86,7 @@ public sealed class AlertUpdater : IDisposable {
     }
 
     private void OnInventoryChange(InventoryWatcher.ChangeType changeType) {
-        // Service.Log.Warning($"Inventory change detected [{changeType}] ({Service.ClientState.IsLoggedIn}/{Service.PlayerState.IsLoaded})");
+        Service.Log.Verbose($"Inventory change detected [{changeType}] ({Service.ClientState.IsLoggedIn}/{Service.PlayerState.IsLoaded})");
 
         var reason = changeType == InventoryWatcher.ChangeType.Inventory
             ? UpdateReason.InventoryChange
@@ -110,10 +110,10 @@ public sealed class AlertUpdater : IDisposable {
     }
 
     private void CheckAlertState(UpdateReason reason) {
-        // Service.Log.Warning($"Checking alerts [{reason}]");
+        Service.Log.Verbose($"Checking alerts [{reason}]");
 
         if (!Service.ClientState.IsLoggedIn || !Service.PlayerState.IsLoaded) {
-            // Service.Log.Info("  Resetting alerts (not logged in)");
+            Service.Log.Verbose("  Resetting alerts (not logged in)");
             ResetAll();
             return;
         }
@@ -149,7 +149,7 @@ public class ChatUpdater(ZoneWatcher zoneWatcher) {
         currentChatAlertIds = alerts.Select(a => a.AlertId).ToArray();
 
         var notifyMode = GetNotifyMode(reason);
-        // Service.Log.Info($"  Chat: {notifyMode}");
+        Service.Log.Verbose($"  Chat: {notifyMode}");
 
         if (notifyMode == NotifyMode.SendAll)
             Chat.SendChatAlerts(alerts);
@@ -223,7 +223,7 @@ public class OverlayUpdater {
 
     public void Update(UpdateReason reason, List<Alert> alerts) {
         var redrawMode = GetRedrawMode(reason);
-        // Service.Log.Info($"  Overlay: {redrawMode}");
+        Service.Log.Verbose($"  Overlay: {redrawMode}");
 
         if (redrawMode == RedrawMode.Skip) return;
 
@@ -235,7 +235,7 @@ public class OverlayUpdater {
         if (!redraw && !alerts.SequenceEqual(currentPanelAlerts, AlertComparer))
             redraw = true;
 
-        // Service.Log.Info($"    Eval {Plugin.Config.Burdens.Count} burdens -> {alerts.Count} panels (redraw:{redraw})");
+        Service.Log.Verbose($"    Eval {Plugin.Config.Burdens.Count} burdens -> {alerts.Count} panels (redraw:{redraw})");
 
         if (redraw) {
             currentPanelAlerts = alerts.ToArray();
