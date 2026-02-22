@@ -7,14 +7,14 @@ using System.Numerics;
 
 namespace CurrencyWatchdog.Native;
 
-public sealed class ContainerNode : OverlayNode {
+public sealed class WatchdogContainerNode : OverlayNode {
     public override OverlayLayer OverlayLayer => OverlayLayer.BehindUserInterface;
 
     public readonly List<CurrencyNode> Children = [];
 
     private int visibleChildren;
 
-    public ContainerNode() {
+    public WatchdogContainerNode() {
         Position = new Vector2(400, 200);
         Size = new Vector2(20, 20);
     }

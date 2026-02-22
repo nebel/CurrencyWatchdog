@@ -11,14 +11,14 @@ public sealed class Overlay : IDisposable {
     public bool ShowDummy { get; set; }
 
     private OverlayController? overlayController;
-    private ContainerNode? container;
+    private WatchdogContainerNode? container;
 
     public void FrameworkThreadInit() {
         if (MainThreadSafety.TryAssertMainThread()) return;
 
         Service.Log.Debug("Overlay::FrameworkThreadInit");
         overlayController = new OverlayController();
-        container = new ContainerNode();
+        container = new WatchdogContainerNode();
 
         overlayController.AddNode(container);
     }
