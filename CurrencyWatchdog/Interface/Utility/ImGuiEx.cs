@@ -19,6 +19,27 @@ public static class ImGuiEx {
         }
     }
 
+    public static bool NullableInputInt(string label, int defaultValue, ref int? value) {
+        using var id = ImRaii.PushId($"nullableInputInt:{label}");
+
+        var hasValue = value is not null;
+        var localValue = value ?? defaultValue;
+
+        bool valueChanged;
+        using (ImRaii.Disabled(!hasValue)) {
+            valueChanged = ImGui.InputInt($"##value", ref localValue, 1, 1);
+        }
+
+        ImGui.SameLine();
+        var hasValueChanged = ImGui.Checkbox($"{label}##check", ref hasValue);
+
+        if (!valueChanged && !hasValueChanged)
+            return false;
+
+        value = hasValue ? localValue : null;
+        return true;
+    }
+
     public static bool NullableInputText(string label, string defaultText, ref string? text, int maxLength = 200) {
         using var id = ImRaii.PushId($"nullableInputText:{label}");
 

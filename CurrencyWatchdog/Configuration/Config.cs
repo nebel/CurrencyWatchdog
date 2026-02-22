@@ -102,6 +102,9 @@ public class Burden {
     public List<Subject> Subjects { get; set; } = [];
     public List<Rule> Rules { get; set; } = [];
 
+    public int? PanelLimit { get; set; }
+    public int? ChatLimit { get; set; }
+
     public Burden Clone() {
         return new Burden {
             Guid = Guid.NewGuid(),

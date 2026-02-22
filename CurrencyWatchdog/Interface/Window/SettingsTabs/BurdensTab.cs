@@ -215,6 +215,20 @@ public class BurdensTab(ConfigWindow window) {
             changed = true;
         }
 
+        if (ImGui.CollapsingHeader("Advanced")) {
+            var panelLimit = burden.PanelLimit;
+            if (ImGuiEx.NullableInputInt("Limit displayed overlay panels", 5, ref panelLimit)) {
+                burden.PanelLimit = panelLimit is { } limit ? Math.Clamp(limit, 0, int.MaxValue) : panelLimit;
+                changed = true;
+            }
+
+            var chatLimit = burden.ChatLimit;
+            if (ImGuiEx.NullableInputInt("Limit displayed chat alerts", 5, ref chatLimit)) {
+                burden.ChatLimit = chatLimit is { } limit ? Math.Clamp(limit, 0, int.MaxValue) : chatLimit;
+                changed = true;
+            }
+        }
+
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();

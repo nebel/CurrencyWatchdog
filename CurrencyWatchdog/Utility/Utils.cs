@@ -22,3 +22,16 @@ public static class Utils {
         return (autoIcon, burden.Name ?? autoName);
     }
 }
+
+public ref struct CappedCounter(int max) {
+    private int current = 0;
+
+    public bool TryIncrement() {
+        if (current < max) {
+            current++;
+            return true;
+        }
+
+        return false;
+    }
+}

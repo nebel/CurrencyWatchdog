@@ -1,5 +1,6 @@
 using CurrencyWatchdog.Configuration;
 using CurrencyWatchdog.Expressions;
+using CurrencyWatchdog.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using System;
@@ -56,6 +57,9 @@ public class Evaluator {
             if (!burden.Enabled)
                 continue;
 
+            var burdenPanelCounter = new CappedCounter(burden.PanelLimit ?? 50);
+            var burdenChatCounter = new CappedCounter(burden.ChatLimit ?? 50);
+
             for (var subjectIndex = 0; subjectIndex < burden.Subjects.Count; subjectIndex++) {
                 var subject = burden.Subjects[subjectIndex];
                 if (subject.Enabled && GetDetails(subject) is { } itemDetails) {
@@ -66,10 +70,14 @@ public class Evaluator {
                     var alertId = new AlertId(foundRule.Guid, subjectIndex);
                     var alert = new Alert(alertId, foundRule, itemDetails);
 
-                    if (Plugin.Config.OverlayConfig.Enabled && foundRule.ShowPanel)
-                        panelAlerts.Add(alert);
-                    if (Plugin.Config.ChatConfig.Enabled && foundRule.ShowChat)
-                        chatAlerts.Add(alert);
+                    if (Plugin.Config.OverlayConfig.Enabled && foundRule.ShowPanel) {
+                        if (burdenPanelCounter.TryIncrement())
+                            panelAlerts.Add(alert);
+                    }
+                    if (Plugin.Config.ChatConfig.Enabled && foundRule.ShowChat) {
+                        if (burdenChatCounter.TryIncrement())
+                            chatAlerts.Add(alert);
+                    }
                 }
             }
         }
