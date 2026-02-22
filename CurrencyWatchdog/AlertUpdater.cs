@@ -217,8 +217,6 @@ public class ChatUpdater(ZoneWatcher zoneWatcher) {
 }
 
 public class OverlayUpdater {
-    private static readonly AlertComparer AlertComparer = new();
-
     private Alert[] currentPanelAlerts = [];
 
     public void Update(UpdateReason reason, List<Alert> alerts) {
@@ -232,7 +230,7 @@ public class OverlayUpdater {
         if (!redraw && alerts.Count != currentPanelAlerts.Length)
             redraw = true;
 
-        if (!redraw && !alerts.SequenceEqual(currentPanelAlerts, AlertComparer))
+        if (!redraw && !alerts.SequenceEqual(currentPanelAlerts, AlertComparer.Instance))
             redraw = true;
 
         Service.Log.Verbose($"    Eval {Plugin.Config.Burdens.Count} burdens -> {alerts.Count} panels (redraw:{redraw})");

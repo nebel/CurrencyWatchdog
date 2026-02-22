@@ -33,6 +33,8 @@ public record Alert(AlertId AlertId, Rule ActiveRule, SubjectDetails SubjectDeta
 }
 
 public sealed class AlertComparer : IEqualityComparer<Alert> {
+    public static readonly AlertComparer Instance = new();
+
     public bool Equals(Alert? a, Alert? b) {
         if (ReferenceEquals(a, b)) return true;
         return a is not null
