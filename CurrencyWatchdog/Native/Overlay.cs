@@ -66,7 +66,7 @@ public sealed class Overlay : IDisposable {
             var node = container.Children[i];
             node.Apply(overlayConfig, PanelPayload.From(element));
 
-            if (direction == LayoutDirection.Left)
+            if (direction is LayoutDirection.LeftDown or LayoutDirection.LeftUp)
                 currentPosition -= new Vector2(node.ContentSize.X + padding.Horizontal + gap, 0);
 
             node.Position = currentPosition;
@@ -77,13 +77,73 @@ public sealed class Overlay : IDisposable {
             currentPosition += direction switch {
                 LayoutDirection.UpLeft or LayoutDirection.UpRight => new Vector2(0, -node.ContentSize.Y - padding.Vertical - gap),
                 LayoutDirection.DownLeft or LayoutDirection.DownRight => new Vector2(0, node.ContentSize.Y + padding.Vertical + gap),
-                LayoutDirection.Right => new Vector2(node.ContentSize.X + padding.Horizontal + gap, 0),
+                LayoutDirection.RightDown or LayoutDirection.RightUp => new Vector2(node.ContentSize.X + padding.Horizontal + gap, 0),
                 _ => Vector2.Zero,
             };
+
+            if (overlayConfig.LayoutWrap == LayoutWrap.WrapAtSize)
+                HandleWrapAtSize(overlayConfig, ref currentPosition, node);
         }
 
         if (Math.Abs(container.ScaleX - overlayConfig.Scale) > 0.001)
             container.Scale = new Vector2(overlayConfig.Scale, overlayConfig.Scale);
+    }
+
+    private void HandleWrapAtSize(OverlayConfig overlayConfig, ref Vector2 currentPosition, CurrencyNode node) {
+        var limit = overlayConfig.LayoutWrapSize;
+        var padding = overlayConfig.PanelPadding;
+        var gap = overlayConfig.PanelGap;
+
+        switch (overlayConfig.LayoutDirection) {
+            case LayoutDirection.RightDown:
+                if (currentPosition.X >= limit) {
+                    currentPosition.X = 0;
+                    currentPosition.Y += node.ContentSize.Y + padding.Vertical + gap;
+                }
+                break;
+            case LayoutDirection.RightUp:
+                if (currentPosition.X >= limit) {
+                    currentPosition.X = 0;
+                    currentPosition.Y -= node.ContentSize.Y + padding.Vertical + gap;
+                }
+                break;
+            case LayoutDirection.LeftDown:
+                if (-currentPosition.X >= limit) {
+                    currentPosition.X = 0;
+                    currentPosition.Y += node.ContentSize.Y + padding.Vertical + gap;
+                }
+                break;
+            case LayoutDirection.LeftUp:
+                if (-currentPosition.X >= limit) {
+                    currentPosition.X = 0;
+                    currentPosition.Y -= node.ContentSize.Y + padding.Vertical + gap;
+                }
+                break;
+            case LayoutDirection.DownRight:
+                if (currentPosition.Y >= limit) {
+                    currentPosition.Y = 0;
+                    currentPosition.X += node.ContentSize.X + padding.Horizontal + gap;
+                }
+                break;
+            case LayoutDirection.DownLeft:
+                if (currentPosition.Y >= limit) {
+                    currentPosition.Y = 0;
+                    currentPosition.X -= node.ContentSize.X + padding.Horizontal + gap;
+                }
+                break;
+            case LayoutDirection.UpRight:
+                if (-currentPosition.Y >= limit) {
+                    currentPosition.Y = 0;
+                    currentPosition.X += node.ContentSize.X + padding.Horizontal + gap;
+                }
+                break;
+            case LayoutDirection.UpLeft:
+                if (-currentPosition.Y >= limit) {
+                    currentPosition.Y = 0;
+                    currentPosition.X -= node.ContentSize.X + padding.Horizontal + gap;
+                }
+                break;
+        }
     }
 
     public void ClearNodes() {

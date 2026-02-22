@@ -45,6 +45,22 @@ public class OverlayTab {
             changed = true;
         }
 
+        var layoutWrap = overlay.LayoutWrap;
+        if (ImGuiEx.EnumCombo("Layout Wrap", ref layoutWrap)) {
+            overlay.LayoutWrap = layoutWrap;
+            changed = true;
+        }
+        ImGuiComponents.HelpMarker("If Layout Direction is \"Up\" or \"Down\", text may overlap when wrapping. If so, consider setting Panel Width "
+                                   + "Mode to \"Fixed\".");
+
+        if (layoutWrap == LayoutWrap.WrapAtSize) {
+            var layoutWrapSize = overlay.LayoutWrapSize;
+            if (ImGui.DragFloat("Wrap at size", ref layoutWrapSize, 1f, 1f, 5_000f, flags: ImGuiSliderFlags.AlwaysClamp)) {
+                overlay.LayoutWrapSize = layoutWrapSize;
+                changed = true;
+            }
+        }
+
         var iconSide = overlay.IconSide;
         if (ImGuiEx.EnumCombo("Icon Side", ref iconSide)) {
             overlay.IconSide = iconSide;

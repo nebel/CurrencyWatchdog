@@ -17,6 +17,16 @@ public static class Extensions {
             }
             return self.ToString();
         }
+
+        public int? GetDisplayOrder() {
+            if (Enum.GetName(self) is { } name
+                && typeof(T).GetField(name) is { } field
+                && field.GetCustomAttribute<DisplayAttribute>() is { } displayAttribute
+                && displayAttribute.GetOrder() is { } displayOrder) {
+                return displayOrder;
+            }
+            return null;
+        }
     }
 
     extension(SubjectExpression self) {

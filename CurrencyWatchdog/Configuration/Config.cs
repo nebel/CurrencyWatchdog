@@ -43,7 +43,9 @@ public record OverlayConfig {
     public Vector2 Position { get; set; } = new(400f, 200f);
     public float Scale { get; set; } = 1f;
     public float IconSize { get; set; } = 32f;
-    public LayoutDirection LayoutDirection { get; set; } = LayoutDirection.Right;
+    public LayoutDirection LayoutDirection { get; set; } = LayoutDirection.RightDown;
+    public LayoutWrap LayoutWrap { get; set; } = LayoutWrap.None;
+    public float LayoutWrapSize { get; set; } = 300f;
     public IconSideType IconSide { get; set; } = IconSideType.Left;
     public GameFont QuantityFont { get; set; } = GameFont.Axis;
     public FontOutlineType QuantityFontOutline { get; set; } = FontOutlineType.Strong;
@@ -173,18 +175,30 @@ public record RuleChatConfig {
 
 [Serializable]
 public enum LayoutDirection {
-    [Display(Name = "Right")]
-    Right,
-    [Display(Name = "Left")]
-    Left,
-    [Display(Name = "Down (text growing right)")]
+    [Display(Name = "Right (extending down)", Order = 0)]
+    RightDown,
+    [Display(Name = "Left (extending down)", Order = 2)]
+    LeftDown,
+    [Display(Name = "Down (extending right)", Order = 4)]
     DownRight,
-    [Display(Name = "Down (text growing left)")]
+    [Display(Name = "Down (extending left)", Order = 5)]
     DownLeft,
-    [Display(Name = "Up (text growing right)")]
+    [Display(Name = "Up (extending right)", Order = 6)]
     UpRight,
-    [Display(Name = "Up (text growing left)")]
+    [Display(Name = "Up (extending left)", Order = 7)]
     UpLeft,
+    [Display(Name = "Right (extending up)", Order = 1)]
+    RightUp,
+    [Display(Name = "Left (extending up)", Order = 3)]
+    LeftUp,
+}
+
+[Serializable]
+public enum LayoutWrap {
+    [Display(Name = "None (don't wrap)")]
+    None,
+    [Display(Name = "Wrap at specified size")]
+    WrapAtSize,
 }
 
 [Serializable]

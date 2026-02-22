@@ -84,6 +84,10 @@ public static class ImGuiEx {
 
     public static bool EnumCombo<T>(string label, ref T value) where T : struct, Enum {
         var values = Enum.GetValues<T>();
+        if (values.Length != 0 && values[0].GetDisplayOrder() is not null) {
+            Array.Sort(values, (a, b) => a.GetDisplayOrder()!.Value.CompareTo(b.GetDisplayOrder()!.Value));
+        }
+
         var names = values.Select(e => e.GetDisplayName()).ToArray();
         var index = Array.IndexOf(values, value);
 
