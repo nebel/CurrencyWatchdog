@@ -502,12 +502,12 @@ public class BurdensTab(ConfigWindow window) {
 
     private void DrawRules(Burden burden, ref bool changed) {
         for (var i = 0; i < burden.Rules.Count; i++) {
-            if (DrawRule(burden, i, ref changed)) break;
+            DrawRule(burden, i, ref changed);
         }
         ruleDragDrop.EndFrame();
     }
 
-    private bool DrawRule(Burden burden, int i, ref bool changed) {
+    private void DrawRule(Burden burden, int i, ref bool changed) {
         var rule = burden.Rules[i];
         using var id = ImRaii.PushId($"rule:{i}");
 
@@ -590,7 +590,6 @@ public class BurdensTab(ConfigWindow window) {
             ImGui.Spacing();
             DrawRuleOutputs(rule, ref changed);
         }
-        return false;
     }
 
     private void DrawRuleConditions(Rule rule, ref bool changed) {
