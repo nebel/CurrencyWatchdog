@@ -281,7 +281,20 @@ public class SubjectSelectorWindow : Dalamud.Interface.Windowing.Window {
     public static IEnumerable<Item> GetCurrencyItems() {
         var obsoleteTomes = GetObsoleteTomestones();
         return GetItems()
-            .Where(item => item is { ItemUICategory.RowId: 100 } or { RowId: >= 1 and < 100 })
+            .Where(item => item
+                is { ItemUICategory.RowId: 100 } // Currency
+                or {
+                    ItemUICategory.RowId: 63, // Other
+                    FilterGroup:
+                    40     // Bozjan Cluster
+                    or 47  // Sanctuary Cowrie (ignoring 48 = Sanctuary Material on purpose as it's too much noise)
+                    or 54  // Occult Crescent Enlightenment Piece
+                    or 55  // Cosmic Exploration Cosmocredit
+                    or 56  // Cosmic Exploration Lunar Credit
+                    or 57, // Occult Crescent Sanguine Cipher
+                }
+                or { RowId: >= 1 and < 100 }
+            )
             .Where(item => !obsoleteTomes.Contains(item));
     }
 
