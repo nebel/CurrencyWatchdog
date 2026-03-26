@@ -114,6 +114,8 @@ public class Burden {
             Name = Name,
             Subjects = Subjects.Select(x => x with { }).ToList(),
             Rules = Rules.Select(x => x.Clone()).ToList(),
+            PanelLimit = PanelLimit,
+            ChatLimit = ChatLimit,
         };
     }
 }
