@@ -1,4 +1,5 @@
 using CurrencyWatchdog.Configuration;
+using CurrencyWatchdog.Watcher;
 using KamiToolKit.Extensions;
 using KamiToolKit.Overlay;
 using System;
@@ -50,9 +51,13 @@ public sealed class Overlay : IDisposable {
             alerts.Insert(0, Alert.Dummy);
         }
 
-        container.SetVisibleChildCount(alerts.Count);
+        var alertCount = Plugin.Config.OverlayConfig.HideInDuty && ActivityWatcher.IsInDuty()
+            ? 0
+            : alerts.Count;
 
-        if (alerts.Count == 0)
+        container.SetVisibleChildCount(alertCount);
+
+        if (alertCount == 0)
             return;
 
         var overlayConfig = Plugin.Config.OverlayConfig;
@@ -61,7 +66,7 @@ public sealed class Overlay : IDisposable {
         var gap = overlayConfig.PanelGap;
 
         var currentPosition = new Vector2();
-        for (var i = 0; i < alerts.Count; i++) {
+        for (var i = 0; i < alertCount; i++) {
             var element = alerts[i];
             var node = container.Children[i];
             node.Apply(overlayConfig, PanelPayload.From(element));

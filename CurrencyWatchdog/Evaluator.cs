@@ -49,7 +49,7 @@ public class Evaluator {
         // }
     }
 
-    public (List<Alert> PanelAlerts, List<Alert> ChatAlerts) Evaluate(List<Burden> burdens) {
+    public AlertState Evaluate(List<Burden> burdens) {
         var panelAlerts = new List<Alert>();
         var chatAlerts = new List<Alert>();
 
@@ -82,7 +82,7 @@ public class Evaluator {
             }
         }
 
-        return (panelAlerts, chatAlerts);
+        return new AlertState(panelAlerts, chatAlerts);
     }
 
     private static Rule? FindMatchingRule(Burden burden, SubjectDetails subjectDetails) {

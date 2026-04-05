@@ -54,3 +54,5 @@ public sealed class AlertComparer : IEqualityComparer<Alert> {
             obj.SubjectDetails.LimitedQuantityHeld,
             obj.SubjectDetails.LimitedCap);
 }
+
+public record AlertState(List<Alert> PanelAlerts, List<Alert> ChatAlerts);

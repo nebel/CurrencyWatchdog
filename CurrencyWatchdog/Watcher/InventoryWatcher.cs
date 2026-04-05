@@ -4,7 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
 using System.Collections.Generic;
 
-namespace CurrencyWatchdog;
+namespace CurrencyWatchdog.Watcher;
 
 public sealed class InventoryWatcher : IDisposable {
     private readonly Hook<CurrencyManager.Delegates.SetItemData> setItemDataHook;

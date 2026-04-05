@@ -2,7 +2,7 @@ using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
 using System;
 
-namespace CurrencyWatchdog;
+namespace CurrencyWatchdog.Watcher;
 
 public sealed class LeveWatcher : IDisposable {
     public event Action? OnChange;

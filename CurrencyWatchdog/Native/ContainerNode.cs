@@ -1,5 +1,4 @@
 using CurrencyWatchdog.Configuration;
-using Dalamud.Game.ClientState.Conditions;
 using KamiToolKit.Enums;
 using KamiToolKit.Overlay;
 using System.Collections.Generic;
@@ -20,13 +19,7 @@ public sealed class WatchdogContainerNode : OverlayNode {
     }
 
     protected override void OnUpdate() {
-        var forceHide = Plugin.Config.OverlayConfig.HideInDuty && Service.Condition[ConditionFlag.BoundByDuty56];
-
-        if (forceHide || visibleChildren == 0) {
-            IsVisible = false;
-        } else {
-            IsVisible = true;
-        }
+        IsVisible = visibleChildren != 0;
     }
 
     public void SetVisibleChildCount(int count) {

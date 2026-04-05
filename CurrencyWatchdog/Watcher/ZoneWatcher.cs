@@ -1,7 +1,7 @@
 using Dalamud.Game.ClientState.Conditions;
 using System;
 
-namespace CurrencyWatchdog;
+namespace CurrencyWatchdog.Watcher;
 
 public sealed class ZoneWatcher : IDisposable {
     private bool waiting;

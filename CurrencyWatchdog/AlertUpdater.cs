@@ -1,4 +1,5 @@
 using CurrencyWatchdog.Configuration;
+using CurrencyWatchdog.Watcher;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,12 @@ public sealed class AlertUpdater : IDisposable {
     private readonly InventoryWatcher inventoryWatcher;
     private readonly ZoneWatcher zoneWatcher;
     private readonly LeveWatcher leveWatcher;
+    private readonly ActivityWatcher activityWatcher;
 
     private readonly ChatUpdater chatUpdater;
     private readonly OverlayUpdater overlayUpdater;
+
+    private AlertState? alertState;
 
     private bool Enabled {
         get;
@@ -24,10 +28,12 @@ public sealed class AlertUpdater : IDisposable {
                 inventoryWatcher.OnChange += OnInventoryChange;
                 zoneWatcher.OnChange += OnZoneChange;
                 leveWatcher.OnChange += OnLeveChange;
+                activityWatcher.OnChange += OnActivityChange;
             } else {
                 inventoryWatcher.OnChange -= OnInventoryChange;
                 zoneWatcher.OnChange -= OnZoneChange;
                 leveWatcher.OnChange -= OnLeveChange;
+                activityWatcher.OnChange -= OnActivityChange;
             }
         }
     } = false;
@@ -37,6 +43,7 @@ public sealed class AlertUpdater : IDisposable {
         inventoryWatcher = new InventoryWatcher();
         zoneWatcher = new ZoneWatcher();
         leveWatcher = new LeveWatcher();
+        activityWatcher = new ActivityWatcher();
 
         chatUpdater = new ChatUpdater(zoneWatcher);
         overlayUpdater = new OverlayUpdater();
@@ -49,6 +56,7 @@ public sealed class AlertUpdater : IDisposable {
         inventoryWatcher.Dispose();
         zoneWatcher.Dispose();
         leveWatcher.Dispose();
+        activityWatcher.Dispose();
     }
 
     private void OnConfigChange(Config config) {
@@ -100,6 +108,10 @@ public sealed class AlertUpdater : IDisposable {
         CheckAlertState(UpdateReason.LeveChange);
     }
 
+    private void OnActivityChange() {
+        CheckAlertState(UpdateReason.ActivityChange);
+    }
+
     public void ResendActiveChatAlerts() {
         CheckAlertState(UpdateReason.DebugResendAlerts);
     }
@@ -118,10 +130,27 @@ public sealed class AlertUpdater : IDisposable {
             return;
         }
 
-        var (panelAlerts, chatAlerts) = evaluator.Evaluate(Plugin.Config.Burdens);
+        if (ShouldEvaluate(reason)) {
+            Service.Log.Verbose("  Evaluating alerts");
+            alertState = evaluator.Evaluate(Plugin.Config.Burdens);
+        } else if (alertState is null) {
+            Service.Log.Verbose("  Evaluating alerts (empty cache)");
+            alertState = evaluator.Evaluate(Plugin.Config.Burdens);
+        } else {
+            Service.Log.Verbose("  Using cached alerts");
+        }
 
-        chatUpdater.Update(reason, chatAlerts);
-        overlayUpdater.Update(reason, panelAlerts);
+        chatUpdater.Update(reason, alertState.ChatAlerts);
+        overlayUpdater.Update(reason, alertState.PanelAlerts);
+    }
+
+    private static bool ShouldEvaluate(UpdateReason reason) {
+        return reason is
+            UpdateReason.ConfigChange
+            or UpdateReason.InventoryChange
+            or UpdateReason.CurrencyManagerChange
+            or UpdateReason.LeveChange
+            or UpdateReason.Login;
     }
 }
 
@@ -130,6 +159,7 @@ public enum UpdateReason {
     InventoryChange,
     CurrencyManagerChange,
     LeveChange,
+    ActivityChange,
     Login,
     LoginZoned,
     TerritoryChangeZoned,
@@ -172,6 +202,9 @@ public class ChatUpdater(ZoneWatcher zoneWatcher) {
                 if (zoneWatcher.LoginState != ZoneWatcher.LoginStateType.Complete)
                     return NotifyMode.Suppress;
                 return FromUpdateAction(Plugin.Config.ChatConfig.AlertUpdateAction);
+
+            case UpdateReason.ActivityChange:
+                return NotifyMode.Suppress;
 
             case UpdateReason.Login:
                 return NotifyMode.Suppress;
@@ -256,6 +289,9 @@ public class OverlayUpdater {
             case UpdateReason.CurrencyManagerChange:
             case UpdateReason.LeveChange:
                 return RedrawMode.RedrawIfChanged;
+
+            case UpdateReason.ActivityChange:
+                return RedrawMode.ForceRedraw;
 
             case UpdateReason.Login:
                 return RedrawMode.ForceRedraw;
