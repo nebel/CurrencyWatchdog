@@ -1,7 +1,7 @@
 using CurrencyWatchdog.Configuration;
 using CurrencyWatchdog.Watcher;
 using KamiToolKit.Extensions;
-using KamiToolKit.Overlay;
+using KamiToolKit.Overlay.UiOverlay;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -106,42 +106,49 @@ public sealed class Overlay : IDisposable {
                     currentPosition.Y += node.ContentSize.Y + padding.Vertical + gap;
                 }
                 break;
+
             case LayoutDirection.RightUp:
                 if (currentPosition.X >= limit) {
                     currentPosition.X = 0;
                     currentPosition.Y -= node.ContentSize.Y + padding.Vertical + gap;
                 }
                 break;
+
             case LayoutDirection.LeftDown:
                 if (-currentPosition.X >= limit) {
                     currentPosition.X = 0;
                     currentPosition.Y += node.ContentSize.Y + padding.Vertical + gap;
                 }
                 break;
+
             case LayoutDirection.LeftUp:
                 if (-currentPosition.X >= limit) {
                     currentPosition.X = 0;
                     currentPosition.Y -= node.ContentSize.Y + padding.Vertical + gap;
                 }
                 break;
+
             case LayoutDirection.DownRight:
                 if (currentPosition.Y >= limit) {
                     currentPosition.Y = 0;
                     currentPosition.X += node.ContentSize.X + padding.Horizontal + gap;
                 }
                 break;
+
             case LayoutDirection.DownLeft:
                 if (currentPosition.Y >= limit) {
                     currentPosition.Y = 0;
                     currentPosition.X -= node.ContentSize.X + padding.Horizontal + gap;
                 }
                 break;
+
             case LayoutDirection.UpRight:
                 if (-currentPosition.Y >= limit) {
                     currentPosition.Y = 0;
                     currentPosition.X += node.ContentSize.X + padding.Horizontal + gap;
                 }
                 break;
+
             case LayoutDirection.UpLeft:
                 if (-currentPosition.Y >= limit) {
                     currentPosition.Y = 0;

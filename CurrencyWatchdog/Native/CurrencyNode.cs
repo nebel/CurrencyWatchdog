@@ -3,6 +3,8 @@ using CurrencyWatchdog.Native.Parts;
 using Dalamud.Interface;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using KamiToolKit.Nodes;
+using KamiToolKit.Premade.Node;
+using KamiToolKit.Premade.Node.Simple;
 using System;
 using System.Drawing;
 using System.Numerics;
@@ -118,10 +120,13 @@ public class CurrencyNode : SimpleOverlayNode {
 
         var backdropSizeX = hqIconImageNode.Size.X
                             + labelNode.Size.X
-                            + textPadding.Left + textPadding.Right
-                            + config.PanelPadding.Left + config.PanelPadding.Right;
+                            + textPadding.Left
+                            + textPadding.Right
+                            + config.PanelPadding.Left
+                            + config.PanelPadding.Right;
         var backdropSizeY = hqIconImageNode.Size.Y
-                            + config.PanelPadding.Top + config.PanelPadding.Bottom;
+                            + config.PanelPadding.Top
+                            + config.PanelPadding.Bottom;
         backdropNode.Size = new Vector2(backdropSizeX, backdropSizeY);
         backdropNode.Color = payload.BackdropColor;
     }
