@@ -21,14 +21,14 @@ public record Alert(AlertId AlertId, Rule ActiveRule, SubjectDetails SubjectDeta
                 ),
             ],
         };
-        var itemDetails = new SubjectDetails {
+        var subjectDetails = new SubjectDetails {
             Name = "Dummy",
             IconId = 105,
             Cap = 100,
             EffectiveCap = 100,
             QuantityHeld = 99,
         };
-        return new Alert(alertId, rule, itemDetails);
+        return new Alert(alertId, rule, subjectDetails);
     }
 }
 

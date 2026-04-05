@@ -62,19 +62,19 @@ public class Evaluator {
 
             for (var subjectIndex = 0; subjectIndex < burden.Subjects.Count; subjectIndex++) {
                 var subject = burden.Subjects[subjectIndex];
-                if (subject.Enabled && GetDetails(subject) is { } itemDetails) {
-                    var foundRule = FindMatchingRule(burden, itemDetails);
-                    if (foundRule is null or { ShowChat: false, ShowPanel: false })
+                if (subject.Enabled && GetDetails(subject) is { } subjectDetails) {
+                    var rule = FindMatchingRule(burden, subjectDetails);
+                    if (rule is null or { ShowChat: false, ShowPanel: false })
                         continue;
 
-                    var alertId = new AlertId(foundRule.Guid, subjectIndex);
-                    var alert = new Alert(alertId, foundRule, itemDetails);
+                    var alertId = new AlertId(rule.Guid, subjectIndex);
+                    var alert = new Alert(alertId, rule, subjectDetails);
 
-                    if (Plugin.Config.OverlayConfig.Enabled && foundRule.ShowPanel) {
+                    if (Plugin.Config.OverlayConfig.Enabled && rule.ShowPanel) {
                         if (burdenPanelCounter.TryIncrement())
                             panelAlerts.Add(alert);
                     }
-                    if (Plugin.Config.ChatConfig.Enabled && foundRule.ShowChat) {
+                    if (Plugin.Config.ChatConfig.Enabled && rule.ShowChat) {
                         if (burdenChatCounter.TryIncrement())
                             chatAlerts.Add(alert);
                     }
