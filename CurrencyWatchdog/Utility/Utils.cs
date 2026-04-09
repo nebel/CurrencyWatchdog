@@ -21,6 +21,10 @@ public static class Utils {
 
         return (autoIcon, burden.Name ?? autoName);
     }
+
+    public static string NormalizeForSearch(string s) {
+        return s.Replace("'", "").Replace("-", "").Replace(" ", "").Trim().ToLowerInvariant();
+    }
 }
 
 public ref struct CappedCounter(int max) {
