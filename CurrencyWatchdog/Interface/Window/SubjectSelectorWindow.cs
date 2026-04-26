@@ -166,9 +166,6 @@ public class SubjectSelectorWindow : Dalamud.Interface.Windowing.Window {
     }
 
     private void DrawConfirmCancel() {
-        using var confirmationButtons = ImRaii.Child("selectCancel", ImGui.GetContentRegionAvail());
-        if (!confirmationButtons) return;
-
         ImGuiHelpers.ScaledDummy(5.0f);
 
         var selectionCount = selectedItemIds.Count + selectedSubjects.Count;
