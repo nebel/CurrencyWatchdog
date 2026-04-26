@@ -134,7 +134,7 @@ public class PresetSelectorWindow : Dalamud.Interface.Windowing.Window {
         using var id = ImRaii.PushId($"subjectName:{name}");
 
         using (ImRaii.PushColor(ImGuiCol.Border, Vector4.One))
-        using (ImRaii.PushStyle(ImGuiStyleVar.ChildBorderSize, 2)) {
+        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero)) {
             if (ImGui.Selectable("##selectable", selectedPresetNames.Contains(name), ImGuiSelectableFlags.AllowItemOverlap, selectableSize)) {
                 if (!selectedPresetNames.Remove(name)) {
                     selectedPresetNames.Add(name);
@@ -143,9 +143,8 @@ public class PresetSelectorWindow : Dalamud.Interface.Windowing.Window {
         }
 
         ImGui.SetCursorPos(cursorPosition);
-        using (ImRaii.Child("selection_child", selectableSize, false, ImGuiWindowFlags.NoInputs)) {
-            DrawPresetContents(preset);
-        }
+        DrawPresetContents(preset);
+        ImGui.SetCursorPosY(cursorPosition.Y + selectableSize.Y);
     }
 
     private void DrawPresetContents(Preset preset) {
