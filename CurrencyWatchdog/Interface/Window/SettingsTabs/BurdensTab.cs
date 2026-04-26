@@ -143,26 +143,19 @@ public class BurdensTab(ConfigWindow window) {
 
         ImGui.SetCursorPos(cursorPosition);
 
-        using (ImRaii.Child("selectableChild", selectableSize, false, ImGuiWindowFlags.NoInputs)) {
-            if (icon.GetTexture() is { } texture) {
-                using var wrap = texture.GetWrapOrEmpty();
-                var tint = burden.Enabled ? Vector4.One : new Vector4(1, 1, 1, 0.5f);
-                ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(selectableSize.Y, selectableSize.Y), tintCol: tint);
-                ImGui.SameLine();
-            }
-
-            var labelSize = ImGui.CalcTextSize(label);
-            ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + ((selectableSize.Y - labelSize.Y) / 2));
-            if (burden.Enabled) {
-                ImGui.Text(label);
-            } else {
-                ImGui.TextDisabled(label);
-            }
+        if (icon.GetTexture() is { } texture) {
+            using var wrap = texture.GetWrapOrEmpty();
+            var tint = burden.Enabled ? Vector4.One : new Vector4(1, 1, 1, 0.5f);
+            ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(selectableSize.Y, selectableSize.Y), tintCol: tint);
+            ImGui.SameLine();
         }
 
-        if (!burden.Enabled) {
-            ImGui.SameLine();
-            ImGui.TextDisabled("(disabled)");
+        var labelSize = ImGui.CalcTextSize(label);
+        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + ((selectableSize.Y - labelSize.Y) / 2));
+        if (burden.Enabled) {
+            ImGui.Text(label);
+        } else {
+            ImGui.TextDisabled(label);
         }
     }
 
