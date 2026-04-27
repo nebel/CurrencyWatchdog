@@ -5,6 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CurrencyWatchdog;
 
@@ -68,7 +69,11 @@ public class Evaluator {
                         continue;
 
                     var alertId = new AlertId(rule.Guid, subjectIndex);
-                    var alert = new Alert(alertId, rule.Clone(keepGuid: true), subjectDetails);
+                    var jurisdictions =
+                        burden.Jurisdictions.Count > 1
+                            ? burden.Jurisdictions.Select(j => j.Clone(keepGuid: true)).ToArray()
+                            : [];
+                    var alert = new Alert(alertId, rule.Clone(keepGuid: true), jurisdictions, subjectDetails);
 
                     if (Plugin.Config.OverlayConfig.Enabled && rule.ShowPanel) {
                         if (burdenPanelCounter.TryIncrement())

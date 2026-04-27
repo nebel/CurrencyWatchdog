@@ -90,6 +90,35 @@ public static class ImGuiEx {
         return false;
     }
 
+    public static bool NullableEnumCombo<T>(string label, T defaultValue, ref T? value) where T : struct, Enum {
+        using var id = ImRaii.PushId($"nullableEnumCombo:{label}");
+
+        var hasValue = value.HasValue;
+
+        var values = Enum.GetValues<T>();
+        if (values.Length != 0 && values[0].GetDisplayOrder() is not null) {
+            Array.Sort(values, (a, b) => a.GetDisplayOrder()!.Value.CompareTo(b.GetDisplayOrder()!.Value));
+        }
+
+        var names = values.Select(e => e.GetDisplayName()).ToArray();
+        var index = Array.IndexOf(values, value ?? defaultValue);
+
+        bool valueChanged;
+        using (ImRaii.Disabled(!hasValue)) {
+            valueChanged = ImGui.Combo("##combo", ref index, names, values.Length);
+        }
+
+        ImGui.SameLine();
+        var hasValueChanged = ImGui.Checkbox($"{label}##check", ref hasValue);
+
+        if (!valueChanged && !hasValueChanged)
+            return false;
+
+        Service.Log.Debug($"Combo: {label} - {value} -> {(hasValue ? values[index] : null)}");
+        value = hasValue ? values[index] : null;
+        return true;
+    }
+
     public static void HoverTooltip(string text) {
         if (text == "") return;
         using (ImRaii.DefaultStyle()) {

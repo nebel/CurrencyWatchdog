@@ -6,6 +6,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -15,6 +16,8 @@ namespace CurrencyWatchdog.Interface.Window;
 public class ConfigWindow : Dalamud.Interface.Windowing.Window {
     public readonly LeasedImmediateSlot<Guid, List<Subject>> SubjectSelectorSlot;
     public readonly LeasedImmediateSlot<Guid, List<Burden>> PresetSelectorSlot;
+    public readonly LeasedImmediateSlot<Guid, List<TerritoryType>> ZoneSelectorSlot;
+    public readonly LeasedImmediateSlot<Guid, List<ContentFinderCondition>> ContentSelectorSlot;
 
     private readonly BurdensTab burdensTab;
     private readonly ChatTab chatTab;
@@ -34,6 +37,12 @@ public class ConfigWindow : Dalamud.Interface.Windowing.Window {
         PresetSelectorSlot = new LeasedImmediateSlot<Guid, List<Burden>>();
         PresetSelectorSlot.Invalidated += () => { Plugin.WindowManager.PresetSelectorWindow.IsOpen = false; };
 
+        ZoneSelectorSlot = new LeasedImmediateSlot<Guid, List<TerritoryType>>();
+        ZoneSelectorSlot.Invalidated += () => { Plugin.WindowManager.ZoneSelectorWindow.IsOpen = false; };
+
+        ContentSelectorSlot = new LeasedImmediateSlot<Guid, List<ContentFinderCondition>>();
+        ContentSelectorSlot.Invalidated += () => { Plugin.WindowManager.ContentSelectorWindow.IsOpen = false; };
+
         burdensTab = new BurdensTab(this);
         chatTab = new ChatTab();
         overlayTab = new OverlayTab();
@@ -52,6 +61,8 @@ public class ConfigWindow : Dalamud.Interface.Windowing.Window {
         backupConfig = null;
         SubjectSelectorSlot.Invalidate();
         PresetSelectorSlot.Invalidate();
+        ZoneSelectorSlot.Invalidate();
+        ContentSelectorSlot.Invalidate();
     }
 
     public override void Draw() {
@@ -104,6 +115,8 @@ public class ConfigWindow : Dalamud.Interface.Windowing.Window {
 
         SubjectSelectorSlot.EndFrame();
         PresetSelectorSlot.EndFrame();
+        ZoneSelectorSlot.EndFrame();
+        ContentSelectorSlot.EndFrame();
 
         if (changed) {
             Plugin.ConfigManager.Save();

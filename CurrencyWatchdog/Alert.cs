@@ -7,7 +7,7 @@ namespace CurrencyWatchdog;
 
 public record AlertId(Guid Guid, int SubjectIndex);
 
-public record Alert(AlertId AlertId, Rule ActiveRule, SubjectDetails SubjectDetails) {
+public record Alert(AlertId AlertId, Rule ActiveRule, Jurisdiction[] Jurisdictions, SubjectDetails SubjectDetails) {
     public static readonly Alert Dummy = GetDummyAlert();
 
     private static Alert GetDummyAlert() {
@@ -28,7 +28,7 @@ public record Alert(AlertId AlertId, Rule ActiveRule, SubjectDetails SubjectDeta
             EffectiveCap = 100,
             QuantityHeld = 99,
         };
-        return new Alert(alertId, rule, subjectDetails);
+        return new Alert(alertId, rule, [], subjectDetails);
     }
 }
 

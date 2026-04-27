@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
+using System.Text.Json.Serialization;
 using static CurrencyWatchdog.Expressions.SubjectExpression;
 
 namespace CurrencyWatchdog.Configuration;
@@ -103,6 +104,7 @@ public class Burden {
     public string? Name { get; set; }
     public List<Subject> Subjects { get; set; } = [];
     public List<Rule> Rules { get; set; } = [];
+    public List<Jurisdiction> Jurisdictions { get; set; } = [];
 
     public int? PanelLimit { get; set; }
     public int? ChatLimit { get; set; }
@@ -114,6 +116,7 @@ public class Burden {
             Name = Name,
             Subjects = Subjects.Select(x => x with { }).ToList(),
             Rules = Rules.Select(x => x.Clone(keepGuid)).ToList(),
+            Jurisdictions = Jurisdictions.Select(x => x.Clone(keepGuid)).ToList(),
             PanelLimit = PanelLimit,
             ChatLimit = ChatLimit,
         };
@@ -300,4 +303,53 @@ public enum SubjectQuality {
     Normal,
     [Display(Name = "HQ")]
     High,
+}
+
+[Serializable]
+public class Jurisdiction {
+    public Guid Guid { get; set; } = Guid.NewGuid();
+    public bool Enabled { get; set; } = true;
+    public string? Name { get; set; }
+    public PanelVisibility Visibility { get; set; } = new();
+    public List<Activity> Activities { get; set; } = [];
+
+    public Jurisdiction Clone(bool keepGuid = false) {
+        return new Jurisdiction {
+            Guid = keepGuid ? Guid : Guid.NewGuid(),
+            Enabled = Enabled,
+            Name = Name,
+            Visibility = Visibility with { },
+            Activities = Activities.Select(x => x with { }).ToList(),
+        };
+    }
+}
+
+[Serializable]
+public record PanelVisibility {
+    public PanelVisibilityKind? Default { get; set; }
+    public PanelVisibilityKind? InDuty { get; set; }
+}
+
+[Serializable]
+public enum PanelVisibilityKind {
+    [Display(Name = "Hide Panels")]
+    Hide,
+    [Display(Name = "Show Panels")]
+    Show,
+}
+
+[JsonDerivedType(typeof(ZoneActivity), "ZoneActivity")]
+[JsonDerivedType(typeof(ContentActivity), "ContentActivity")]
+public abstract record Activity {
+    public bool Enabled { get; set; } = true;
+
+    [Serializable]
+    public record ZoneActivity : Activity {
+        public uint RowId { get; set; }
+    }
+
+    [Serializable]
+    public record ContentActivity : Activity {
+        public uint RowId { get; set; }
+    }
 }

@@ -99,7 +99,6 @@ public partial class BurdensTab(ConfigWindow window) {
     private void DrawBurdenListItem(Config config, int i, ref bool changed) {
         var burden = config.Burdens[i];
 
-
         using var id = ImRaii.PushId($"burdenList:{i}");
 
         var isSelected = selectedBurdenIndex == i;
@@ -195,10 +194,14 @@ public partial class BurdensTab(ConfigWindow window) {
                 burden.ChatLimit = chatLimit is { } limit ? Math.Clamp(limit, 0, int.MaxValue) : chatLimit;
                 changed = true;
             }
+
+            DrawCreateJurisdictionsButton(burden, ref changed);
         }
 
         DrawSubjectsSection(burden, ref changed);
 
         DrawRulesSection(burden, ref changed);
+
+        DrawJurisdictionsSection(burden, ref changed);
     }
 }

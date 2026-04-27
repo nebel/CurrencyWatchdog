@@ -51,10 +51,7 @@ public sealed class Overlay : IDisposable {
             alerts.Insert(0, Alert.Dummy);
         }
 
-        var alertCount = Plugin.Config.OverlayConfig.HideInDuty && ActivityWatcher.IsInDuty()
-            ? 0
-            : alerts.Count;
-
+        var alertCount = alerts.Count;
         container.SetVisibleChildCount(alertCount);
 
         if (alertCount == 0)

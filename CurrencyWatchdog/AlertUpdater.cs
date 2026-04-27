@@ -11,6 +11,7 @@ public sealed class AlertUpdater : IDisposable {
     private readonly InventoryWatcher inventoryWatcher;
     private readonly ZoneWatcher zoneWatcher;
     private readonly LeveWatcher leveWatcher;
+    private readonly ConditionWatcher conditionWatcher;
     private readonly ActivityWatcher activityWatcher;
 
     private readonly ChatUpdater chatUpdater;
@@ -28,11 +29,13 @@ public sealed class AlertUpdater : IDisposable {
                 inventoryWatcher.OnChange += OnInventoryChange;
                 zoneWatcher.OnChange += OnZoneChange;
                 leveWatcher.OnChange += OnLeveChange;
+                conditionWatcher.OnChange += OnConditionChange;
                 activityWatcher.OnChange += OnActivityChange;
             } else {
                 inventoryWatcher.OnChange -= OnInventoryChange;
                 zoneWatcher.OnChange -= OnZoneChange;
                 leveWatcher.OnChange -= OnLeveChange;
+                conditionWatcher.OnChange -= OnConditionChange;
                 activityWatcher.OnChange -= OnActivityChange;
             }
         }
@@ -43,6 +46,7 @@ public sealed class AlertUpdater : IDisposable {
         inventoryWatcher = new InventoryWatcher();
         zoneWatcher = new ZoneWatcher();
         leveWatcher = new LeveWatcher();
+        conditionWatcher = new ConditionWatcher();
         activityWatcher = new ActivityWatcher();
 
         chatUpdater = new ChatUpdater(zoneWatcher);
@@ -56,7 +60,7 @@ public sealed class AlertUpdater : IDisposable {
         inventoryWatcher.Dispose();
         zoneWatcher.Dispose();
         leveWatcher.Dispose();
-        activityWatcher.Dispose();
+        conditionWatcher.Dispose();
     }
 
     private void OnConfigChange(Config config) {
@@ -106,6 +110,10 @@ public sealed class AlertUpdater : IDisposable {
 
     private void OnLeveChange() {
         CheckAlertState(UpdateReason.LeveChange);
+    }
+
+    private void OnConditionChange() {
+        CheckAlertState(UpdateReason.ConditionChange);
     }
 
     private void OnActivityChange() {
@@ -159,6 +167,7 @@ public enum UpdateReason {
     InventoryChange,
     CurrencyManagerChange,
     LeveChange,
+    ConditionChange,
     ActivityChange,
     Login,
     LoginZoned,
@@ -203,6 +212,7 @@ public class ChatUpdater(ZoneWatcher zoneWatcher) {
                     return NotifyMode.Suppress;
                 return FromUpdateAction(Plugin.Config.ChatConfig.AlertUpdateAction);
 
+            case UpdateReason.ConditionChange:
             case UpdateReason.ActivityChange:
                 return NotifyMode.Suppress;
 
@@ -260,18 +270,72 @@ public class OverlayUpdater {
 
         var redraw = redrawMode == RedrawMode.ForceRedraw;
 
-        if (!redraw && alerts.Count != currentPanelAlerts.Length)
+        var shownAlerts = new List<Alert>();
+        var defaultVis = GetDefaultVisibility();
+        foreach (var alert in alerts) {
+            if (GetAlertVisibility(alert, defaultVis) == PanelVisibilityKind.Show)
+                shownAlerts.Add(alert);
+        }
+
+        if (!redraw && shownAlerts.Count != currentPanelAlerts.Length)
             redraw = true;
 
-        if (!redraw && !alerts.SequenceEqual(currentPanelAlerts, AlertComparer.Instance))
+        if (!redraw && !shownAlerts.SequenceEqual(currentPanelAlerts, AlertComparer.Instance))
             redraw = true;
 
-        Service.Log.Verbose($"    Eval {Plugin.Config.Burdens.Count} burdens -> {alerts.Count} panels (redraw:{redraw})");
+        Service.Log.Verbose($"    Eval {Plugin.Config.Burdens.Count} burdens -> {shownAlerts.Count} panels (redraw:{redraw})");
 
         if (redraw) {
-            currentPanelAlerts = alerts.ToArray();
-            Plugin.Overlay.UpdateNodes(alerts);
+            currentPanelAlerts = shownAlerts.ToArray();
+            Plugin.Overlay.UpdateNodes(shownAlerts);
         }
+    }
+
+    private static DefaultPanelVisibility GetDefaultVisibility() {
+        return new DefaultPanelVisibility {
+            Default = PanelVisibilityKind.Show,
+            InDuty = Plugin.Config.OverlayConfig.HideInDuty ? PanelVisibilityKind.Hide : PanelVisibilityKind.Show,
+        };
+    }
+
+    private static PanelVisibilityKind GetAlertVisibility(Alert alert, DefaultPanelVisibility defaultVis) {
+        if (alert.Jurisdictions.Length != 0) {
+            foreach (var juris in alert.Jurisdictions) {
+                if (juris.Enabled && GetJurisdictionVisibility(juris) is { } visibility) {
+                    if (ConditionWatcher.IsInDuty())
+                        return visibility.InDuty ?? defaultVis.InDuty;
+                    return visibility.Default ?? defaultVis.Default;
+                }
+            }
+        }
+
+        if (ConditionWatcher.IsInDuty())
+            return defaultVis.InDuty;
+        return defaultVis.Default;
+    }
+
+    public static PanelVisibility? GetJurisdictionVisibility(Jurisdiction juris) {
+        if (juris.Activities.Count == 0)
+            return juris.Visibility;
+
+        foreach (var activity in juris.Activities) {
+            if (!activity.Enabled) continue;
+            switch (activity) {
+                case Activity.ContentActivity contentActivity:
+                    if (contentActivity.RowId == ActivityWatcher.CurrentContentFinderConditionId)
+                        return juris.Visibility;
+                    break;
+
+                case Activity.ZoneActivity zoneActivity:
+                    if (zoneActivity.RowId == ActivityWatcher.CurrentTerritoryTypeId)
+                        return juris.Visibility;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException($"Unknown activity type: {activity.GetType().Name}");
+            }
+        }
+
+        return null;
     }
 
     public void Reset() {
@@ -290,8 +354,9 @@ public class OverlayUpdater {
             case UpdateReason.LeveChange:
                 return RedrawMode.RedrawIfChanged;
 
+            case UpdateReason.ConditionChange:
             case UpdateReason.ActivityChange:
-                return RedrawMode.ForceRedraw;
+                return RedrawMode.RedrawIfChanged;
 
             case UpdateReason.Login:
                 return RedrawMode.ForceRedraw;
@@ -314,5 +379,10 @@ public class OverlayUpdater {
         Skip,
         ForceRedraw,
         RedrawIfChanged,
+    }
+
+    private ref struct DefaultPanelVisibility {
+        public PanelVisibilityKind Default;
+        public PanelVisibilityKind InDuty;
     }
 }

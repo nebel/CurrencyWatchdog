@@ -1,29 +1,56 @@
-using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
+using Action = System.Action;
 
 namespace CurrencyWatchdog.Watcher;
 
 public sealed class ActivityWatcher : IDisposable {
-    private const ConditionFlag DutyFlag = ConditionFlag.BoundByDuty56;
+    public static uint CurrentTerritoryTypeId { get; private set; }
+    public static uint CurrentContentFinderConditionId { get; private set; }
 
     public event Action? OnChange;
 
     public ActivityWatcher() {
-        Service.Condition.ConditionChange += OnConditionChange;
+        Init();
+        Service.ClientState.ZoneInit += ZoneInit;
     }
 
     public void Dispose() {
-        Service.Condition.ConditionChange -= OnConditionChange;
+        Service.ClientState.ZoneInit -= ZoneInit;
     }
 
-    public static bool IsInDuty() => Service.Condition[DutyFlag];
-
-    private void OnConditionChange(ConditionFlag flag, bool value) {
-        if (flag == DutyFlag)
-            Notify();
+    private void Init() {
+        Update(GetCurrentTerritoryTypeId(), GetContentFinderConditionId());
     }
 
-    private void Notify() {
-        OnChange?.Invoke();
+    private void ZoneInit(ZoneInitEventArgs args) {
+        if (Update(args.TerritoryType.RowId, args.ContentFinderCondition.RowId))
+            OnChange?.Invoke();
+    }
+
+    private bool Update(uint territoryTypeId, uint contentFinderConditionId) {
+        var changed = false;
+
+        if (CurrentTerritoryTypeId != territoryTypeId) {
+            CurrentTerritoryTypeId = territoryTypeId;
+            changed = true;
+        }
+
+        if (CurrentContentFinderConditionId != contentFinderConditionId) {
+            CurrentContentFinderConditionId = contentFinderConditionId;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static unsafe uint GetCurrentTerritoryTypeId() {
+        var current = GameMain.Instance()->CurrentTerritoryTypeId;
+        return current == 0 ? GameMain.Instance()->NextTerritoryTypeId : current;
+    }
+
+    private static unsafe uint GetContentFinderConditionId() {
+        return GameMain.Instance()->CurrentContentFinderConditionId;
     }
 }

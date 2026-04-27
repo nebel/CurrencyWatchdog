@@ -44,6 +44,23 @@ public class HelpTab {
 
         ImGui.Spacing();
 
+        if (ImGui.CollapsingHeader("Jurisdictions")) {
+            ImGui.TextWrapped("A jurisdiction defines a set of zones or kinds of content in which the visibility of a burden's alert panels can be " +
+                              "customized.");
+
+            ImGui.TextWrapped("For example, even if you normally hide overlay panels in duties, you can define a jurisdiction for a specific zone " +
+                              "(or group of zones) which overrides this behavior and shows overlay panels in that duty.");
+
+            ImGui.TextWrapped("Jurisdictions are an advanced feature, and can be added to a burden under the \"Advanced\" heading section. Once created, " +
+                              "multiple jurisdictions can be defined. If you delete all jurisdictions from a burden, the section not appear.");
+
+            ImGui.TextWrapped("Similar to rules, jurisdictions are evaluated from the top down, and the first jurisdiction that matches will be used. " +
+                              "This first active jurisdiction will be highlighted in green. Other matching (but inactive) jurisdictions will be highlighted " +
+                              "in yellow.");
+        }
+
+        ImGui.Spacing();
+
         if (ImGui.CollapsingHeader("Template strings")) {
             ImGui.TextWrapped("Template strings are text labels with support for special placeholder values.");
 
