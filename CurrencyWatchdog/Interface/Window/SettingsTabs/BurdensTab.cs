@@ -291,9 +291,9 @@ public class BurdensTab(ConfigWindow window) {
         const float rowHeight = 40;
 
         var bgCol = subjectDragDrop.GetDragState(i) switch {
-            DragDropHelper.DragState.None => new Vector4(1, 1, 1, 0.05f),
-            DragDropHelper.DragState.Source => new Vector4(1, 1, 1, 0.15f),
-            DragDropHelper.DragState.Target => new Vector4(1, 1, 0, 0.15f),
+            DragState.None => new Vector4(1, 1, 1, 0.05f),
+            DragState.Source => new Vector4(1, 1, 1, 0.15f),
+            DragState.Target => new Vector4(1, 1, 0, 0.15f),
             _ => Vector4.Zero,
         };
 

@@ -8,32 +8,24 @@ public sealed class DragDropHelper(string payloadId) {
     private int? SourceIndex { get; set; }
     private int? HoverIndex { get; set; }
 
-    private readonly string payloadId = $"WATCHDOG_{payloadId}";
-    private bool sawSourceThisFrame;
+    private readonly string payloadId = $"WATCHDOG_D_{payloadId}";
     private bool sawTargetThisFrame;
 
-    // ReSharper disable once UnusedMethodReturnValue.Global
-    public bool EndFrame() {
-        var dragEnded = SourceIndex.HasValue && !sawSourceThisFrame;
-
+    public void EndFrame() {
         if (!sawTargetThisFrame) {
             HoverIndex = null;
         }
 
-        sawSourceThisFrame = false;
         sawTargetThisFrame = false;
 
-        if (dragEnded) {
+        if (!ImGuiP.IsDragDropActive()) {
             SourceIndex = null;
         }
-
-        return dragEnded;
     }
 
     public ImRaii.DragDropSourceDisposable Drag(int index) {
         var source = ImRaii.DragDropSource();
         if (source) {
-            sawSourceThisFrame = true;
             SourceIndex = index;
             ImGui.SetDragDropPayload(payloadId, ReadOnlySpan<byte>.Empty);
         }
@@ -42,41 +34,31 @@ public sealed class DragDropHelper(string payloadId) {
 
     public DragTargetEnd Drop(int index) {
         var inner = ImRaii.DragDropTarget();
-
-        var sourceIndex = -1;
-        var validDrop = false;
-
         if (inner) {
             sawTargetThisFrame = true;
             HoverIndex = index;
 
             var payload = ImGui.AcceptDragDropPayload(payloadId);
-            if (!payload.IsNull && SourceIndex.HasValue) {
-                var source = SourceIndex.Value;
-                if (source != index) {
-                    sourceIndex = source;
-                    validDrop = true;
-                } else {
-                    SourceIndex = null;
+            if (!payload.IsNull) {
+                if (SourceIndex is { } sourceIndex) {
+                    if (sourceIndex != index) {
+                        return new DragTargetEnd(inner, true, sourceIndex);
+                    }
                 }
+                SourceIndex = null;
+                HoverIndex = null;
             }
         }
 
-        return new DragTargetEnd(inner, validDrop, sourceIndex);
+        return new DragTargetEnd(inner, false, -1);
     }
 
-    public bool IsSource(int index) => SourceIndex == index;
+    private bool IsSource(int index) => SourceIndex == index;
 
-    public bool IsHovered(int index) => HoverIndex == index;
+    private bool IsHovered(int index) => HoverIndex == index && SourceIndex.HasValue;
 
     public DragState GetDragState(int index) {
         return IsSource(index) ? DragState.Source : IsHovered(index) ? DragState.Target : DragState.None;
-    }
-
-    public enum DragState {
-        None,
-        Source,
-        Target,
     }
 
     public ref struct DragTargetEnd(ImRaii.DragDropTargetDisposable inner, bool success, int sourceIndex) : IDisposable {
