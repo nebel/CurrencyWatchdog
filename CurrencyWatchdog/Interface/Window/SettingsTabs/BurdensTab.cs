@@ -315,10 +315,10 @@ public class BurdensTab(ConfigWindow window) {
         var aliasColor = ImGuiEx.GetFadedColor(ImGuiColors.DalamudViolet, fadeMultiplier);
         var overrideCapColor = ImGuiEx.GetFadedColor(ImGuiColors.ParsedGold, fadeMultiplier);
 
-        using var color = new ImRaii.Color()
+        using var color = new ImRaii.ColorDisposable()
             .Push(ImGuiCol.Border, new Vector4(1, 1, 1, 0.1f))
             .Push(ImGuiCol.ChildBg, bgCol);
-        using var style = new ImRaii.Style()
+        using var style = new ImRaii.StyleDisposable()
             .Push(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0))
             .Push(ImGuiStyleVar.WindowPadding, ImGuiHelpers.ScaledVector2(4, 0))
             .Push(ImGuiStyleVar.ChildRounding, 3);

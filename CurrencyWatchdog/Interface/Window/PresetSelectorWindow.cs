@@ -1,9 +1,9 @@
 using CurrencyWatchdog.Configuration;
 using CurrencyWatchdog.Utility;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Textures;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Windowing;
 using System;
 using System.Collections.Generic;
 using System.Linq;

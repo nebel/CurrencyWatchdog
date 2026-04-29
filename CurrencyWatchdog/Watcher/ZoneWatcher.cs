@@ -45,7 +45,7 @@ public sealed class ZoneWatcher : IDisposable {
         LoginState = LoginStateType.None;
     }
 
-    private void OnTerritoryChanged(ushort id) {
+    private void OnTerritoryChanged(uint u) {
         Notify(ChangeType.TerritoryChange);
 
         if (IsZoning()) {
