@@ -308,15 +308,9 @@ public class BurdensTab(ConfigWindow window) {
         var aliasColor = ImGuiEx.GetFadedColor(ImGuiColors.DalamudViolet, fadeMultiplier);
         var overrideCapColor = ImGuiEx.GetFadedColor(ImGuiColors.ParsedGold, fadeMultiplier);
 
-        using var color = new ImRaii.ColorDisposable()
-            .Push(ImGuiCol.Border, new Vector4(1, 1, 1, 0.1f))
-            .Push(ImGuiCol.ChildBg, bgCol);
-        using var style = new ImRaii.StyleDisposable()
-            .Push(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0))
-            .Push(ImGuiStyleVar.WindowPadding, ImGuiHelpers.ScaledVector2(4, 0))
-            .Push(ImGuiStyleVar.ChildRounding, 3);
-        using var child = ImRaii.Child($"subjectChild", ImGuiHelpers.ScaledVector2(-1, rowHeight), true, ImGuiWindowFlags.NoMove);
-        if (!child) return;
+        using var style = ImRaii.PushStyle( ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0));
+
+        ImGuiEx.DrawRoundedBackground(rowHeight, bgCol, new Vector4(1, 1, 1, 0.1f));
 
         var startCursor = ImGui.GetCursorPos();
 
@@ -377,9 +371,10 @@ public class BurdensTab(ConfigWindow window) {
             var buttonIcon = FontAwesomeIcon.TrashAlt;
             var buttonText = "";
             currentPos =
-                startCursor + new Vector2(
-                    ImGui.GetContentRegionAvail().X - ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText),
-                    (ImGui.GetFrameHeight() / 2) - ImGui.GetStyle().FramePadding.Y
+                startCursor
+                + new Vector2(
+                    ImGui.GetContentRegionAvail().X - ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) - ImGui.GetStyle().ItemSpacing.X,
+                    (rowHeight / 2) - (ImGui.GetFrameHeight() / 2)
                 );
 
             ImGui.SetCursorPos(currentPos);

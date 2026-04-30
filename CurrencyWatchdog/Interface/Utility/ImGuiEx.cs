@@ -1,6 +1,7 @@
 using CurrencyWatchdog.Utility;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
 using System.Linq;
@@ -144,5 +145,20 @@ public static class ImGuiEx {
     public static Vector4 GetFadedColor(Vector4 color, float multiplier) {
         var w = color.W * multiplier;
         return color with { W = w };
+    }
+
+    public static void DrawRoundedBackground(float rowHeight, Vector4 backgroundColor, Vector4 borderColor, float? dividerOffset = null) {
+        var topLeft = ImGui.GetCursorScreenPos();
+        var bottomRight = topLeft + ImGuiHelpers.ScaledVector2(ImGui.GetContentRegionAvail().X, rowHeight);
+
+        var drawList = ImGui.GetWindowDrawList();
+        drawList.AddRectFilled(topLeft, bottomRight, ImGui.GetColorU32(backgroundColor), 3f);
+        drawList.AddRect(topLeft, bottomRight, ImGui.GetColorU32(borderColor), 3f, ImDrawFlags.None, 1f);
+
+        if (dividerOffset is { } offset) {
+            var lineTop = topLeft + new Vector2(offset, 0);
+            var lineBottom = lineTop + new Vector2(0, rowHeight);
+            drawList.AddLine(lineTop, lineBottom, ImGui.GetColorU32(borderColor), 1f);
+        }
     }
 }
