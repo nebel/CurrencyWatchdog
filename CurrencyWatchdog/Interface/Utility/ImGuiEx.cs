@@ -10,16 +10,6 @@ using System.Numerics;
 namespace CurrencyWatchdog.Interface.Utility;
 
 public static class ImGuiEx {
-    public static IDisposable CursorExcursion() {
-        return new ExcursionEndObject(ImGui.GetCursorPos());
-    }
-
-    private sealed class ExcursionEndObject(Vector2 startPos) : IDisposable {
-        public void Dispose() {
-            ImGui.SetCursorPos(startPos);
-        }
-    }
-
     public static bool NullableInputInt(string label, int defaultValue, ref int? value) {
         using var id = ImRaii.PushId($"nullableInputInt:{label}");
 

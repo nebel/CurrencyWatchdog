@@ -169,7 +169,7 @@ public class BurdensTab(ConfigWindow window) {
         }
 
         using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0)))
-        using (ImGuiEx.CursorExcursion()) {
+        using (ImCursor.Excursion()) {
             var deleteButtonWidth = ImGuiComponents.GetIconButtonWithTextWidth(FontAwesomeIcon.TrashAlt, "Delete");
             var cloneButtonWidth = ImGuiComponents.GetIconButtonWithTextWidth(FontAwesomeIcon.Clone, "Clone");
 
@@ -539,7 +539,7 @@ public class BurdensTab(ConfigWindow window) {
         Vector2 clonePos;
         using (ImRaii.PushId($"ruleButtonsA"))
         using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0)))
-        using (ImGuiEx.CursorExcursion()) {
+        using (ImCursor.Excursion()) {
             var buttonWidth = ImGuiComponents.GetIconButtonWithTextWidth(FontAwesomeIcon.TrashAlt, "");
             var currentPos = headerStartCursor + new Vector2(headerStartAvail.X - buttonWidth, headerExtraPadding * ImGuiHelpers.GlobalScale);
             deletePos = currentPos;
@@ -569,7 +569,7 @@ public class BurdensTab(ConfigWindow window) {
 
         using (ImRaii.PushId($"ruleButtonsB"))
         using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0)))
-        using (ImGuiEx.CursorExcursion()) {
+        using (ImCursor.Excursion()) {
             RenderDeleteButton(deletePos, ref changed);
             CloneRuleButton(clonePos, ref changed);
         }
