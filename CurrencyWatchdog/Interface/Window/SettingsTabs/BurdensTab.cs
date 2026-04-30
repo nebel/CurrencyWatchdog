@@ -123,10 +123,7 @@ public class BurdensTab(ConfigWindow window) {
         var selectableSize = ImGuiHelpers.ScaledVector2(ImGui.GetContentRegionAvail().X, 24);
 
         if (ImGui.Selectable("##selectable", isSelected, ImGuiSelectableFlags.AllowDoubleClick, selectableSize)) {
-            using var selectChild = ImRaii.Child($"burdenListChild:{i}", new Vector2(-1, 0), true);
-            if (selectChild) {
-                selectedBurdenIndex = i;
-            }
+            selectedBurdenIndex = i;
         }
 
         var (icon, label) = Utils.GetBurdenDisplay(burden);
@@ -318,7 +315,6 @@ public class BurdensTab(ConfigWindow window) {
         ImGui.TextColored(typeColor, subjectTypeName);
 
         var subjectDetails = Plugin.Evaluator.GetDetails(subject);
-
         string subjectName;
         if (subjectDetails != null) {
             if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(subjectDetails.IconId, subjectDetails.UseHqIcon)) is { } texture) {
