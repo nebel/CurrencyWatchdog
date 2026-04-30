@@ -1,4 +1,5 @@
 using CurrencyWatchdog.Configuration;
+using CurrencyWatchdog.Interface.Utility;
 using CurrencyWatchdog.Utility;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Textures;
@@ -199,24 +200,25 @@ public class SubjectSelectorWindow : Dalamud.Interface.Windowing.Window {
 
 
     private void DrawSubject(SubjectRenderInfo info) {
-        var cursorPosition = ImGui.GetCursorPos();
-        var selectableSize = new Vector2(ImGui.GetContentRegionAvail().X, SpecialRowHeight * ImGuiHelpers.GlobalScale);
+        using (ImCursor.Excursion()) {
+            var selectableSize = new Vector2(ImGui.GetContentRegionAvail().X, SpecialRowHeight * ImGuiHelpers.GlobalScale);
 
-        var subject = info.Subject;
-        using var id = ImRaii.PushId($"subjectId:{(int)subject.Type}:{subject.Id}");
+            var subject = info.Subject;
+            using var id = ImRaii.PushId($"subjectId:{(int)subject.Type}:{subject.Id}");
 
-        using (ImRaii.PushColor(ImGuiCol.Border, Vector4.One))
-        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero)) {
-            if (ImGui.Selectable("##selectable", selectedSubjects.Contains(subject), ImGuiSelectableFlags.AllowItemOverlap, selectableSize)) {
-                if (!selectedSubjects.Remove(subject)) {
-                    selectedSubjects.Add(subject);
+            using (ImRaii.PushColor(ImGuiCol.Border, Vector4.One))
+            using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero)) {
+                if (ImGui.Selectable("##selectable", selectedSubjects.Contains(subject), ImGuiSelectableFlags.AllowItemOverlap, selectableSize)) {
+                    if (!selectedSubjects.Remove(subject)) {
+                        selectedSubjects.Add(subject);
+                    }
                 }
             }
         }
-
-        ImGui.SetCursorPos(cursorPosition);
-        DrawSubjectContents(info);
-        ImGui.SetCursorPos(cursorPosition with { Y = cursorPosition.Y + selectableSize.Y });
+        using (ImCursor.Excursion()) {
+            DrawSubjectContents(info);
+        }
+        ImCursor.Y += SpecialRowHeight * ImGuiHelpers.GlobalScale;
     }
 
     private void DrawSubjectContents(SubjectRenderInfo info) {
@@ -238,22 +240,23 @@ public class SubjectSelectorWindow : Dalamud.Interface.Windowing.Window {
     }
 
     private void DrawItem(Item item) {
-        var cursorPosition = ImGui.GetCursorPos();
-        var selectableSize = new Vector2(ImGui.GetContentRegionAvail().X, ItemRowHeight * ImGuiHelpers.GlobalScale);
+        using (ImCursor.Excursion()) {
+            var selectableSize = new Vector2(ImGui.GetContentRegionAvail().X, ItemRowHeight * ImGuiHelpers.GlobalScale);
 
-        using var id = ImRaii.PushId($"itemId:{item.RowId}");
+            using var id = ImRaii.PushId($"itemId:{item.RowId}");
 
-        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero)) {
-            if (ImGui.Selectable("##selectable", selectedItemIds.Contains(item.RowId), ImGuiSelectableFlags.AllowItemOverlap, selectableSize)) {
-                if (!selectedItemIds.Remove(item.RowId)) {
-                    selectedItemIds.Add(item.RowId);
+            using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero)) {
+                if (ImGui.Selectable("##selectable", selectedItemIds.Contains(item.RowId), ImGuiSelectableFlags.AllowItemOverlap, selectableSize)) {
+                    if (!selectedItemIds.Remove(item.RowId)) {
+                        selectedItemIds.Add(item.RowId);
+                    }
                 }
             }
         }
-
-        ImGui.SetCursorPos(cursorPosition);
-        DrawItemContents(item);
-        ImGui.SetCursorPosY(cursorPosition.Y + selectableSize.Y);
+        using (ImCursor.Excursion()) {
+            DrawItemContents(item);
+        }
+        ImCursor.Y += ItemRowHeight * ImGuiHelpers.GlobalScale;
     }
 
     protected void DrawItemContents(Item option) {

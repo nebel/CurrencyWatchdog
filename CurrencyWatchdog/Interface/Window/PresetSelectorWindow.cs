@@ -1,4 +1,5 @@
 using CurrencyWatchdog.Configuration;
+using CurrencyWatchdog.Interface.Utility;
 using CurrencyWatchdog.Utility;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
@@ -127,24 +128,25 @@ public class PresetSelectorWindow : Dalamud.Interface.Windowing.Window {
     }
 
     private void DrawPreset(Preset preset) {
-        var cursorPosition = ImGui.GetCursorPos();
-        var selectableSize = new Vector2(ImGui.GetContentRegionAvail().X, PresetRowHeight * ImGuiHelpers.GlobalScale);
+        using (ImCursor.Excursion()) {
+            var selectableSize = new Vector2(ImGui.GetContentRegionAvail().X, PresetRowHeight * ImGuiHelpers.GlobalScale);
 
-        var name = preset.Name;
-        using var id = ImRaii.PushId($"subjectName:{name}");
+            var name = preset.Name;
+            using var id = ImRaii.PushId($"subjectName:{name}");
 
-        using (ImRaii.PushColor(ImGuiCol.Border, Vector4.One))
-        using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero)) {
-            if (ImGui.Selectable("##selectable", selectedPresetNames.Contains(name), ImGuiSelectableFlags.AllowItemOverlap, selectableSize)) {
-                if (!selectedPresetNames.Remove(name)) {
-                    selectedPresetNames.Add(name);
+            using (ImRaii.PushColor(ImGuiCol.Border, Vector4.One))
+            using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, Vector2.Zero)) {
+                if (ImGui.Selectable("##selectable", selectedPresetNames.Contains(name), ImGuiSelectableFlags.AllowItemOverlap, selectableSize)) {
+                    if (!selectedPresetNames.Remove(name)) {
+                        selectedPresetNames.Add(name);
+                    }
                 }
             }
         }
-
-        ImGui.SetCursorPos(cursorPosition);
-        DrawPresetContents(preset);
-        ImGui.SetCursorPosY(cursorPosition.Y + selectableSize.Y);
+        using (ImCursor.Excursion()) {
+            DrawPresetContents(preset);
+        }
+        ImCursor.Y += PresetRowHeight * ImGuiHelpers.GlobalScale;
     }
 
     private void DrawPresetContents(Preset preset) {

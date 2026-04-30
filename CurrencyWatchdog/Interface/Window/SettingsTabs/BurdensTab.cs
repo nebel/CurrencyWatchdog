@@ -61,13 +61,14 @@ public class BurdensTab(ConfigWindow window) {
 
             var avail = ImGui.GetContentRegionAvail();
             var cursor = ImGui.GetCursorPos();
-            var centerY = cursor.Y + (avail.Y * 0.5f) - (40 * ImGuiHelpers.GlobalScale);
-            var spacing = ImGui.GetStyle().ItemSpacing.Y * 4;
+            var lineSpacing = size1 with { X = 0 };
 
-            ImGui.SetCursorPos(new Vector2(cursor.X + ((avail.X - size1.X) * 0.5f), centerY - size1.Y - (spacing * 0.5f)));
+            ImCursor.Position = cursor;
+            ImCursor.ToNestedRect(size1, avail, -lineSpacing);
             ImGui.TextUnformatted(line1);
 
-            ImGui.SetCursorPos(new Vector2(cursor.X + ((avail.X - size2.X) * 0.5f), centerY + (spacing * 0.5f)));
+            ImCursor.Position = cursor;
+            ImCursor.ToNestedRect(size2, avail, lineSpacing);
             ImGui.TextUnformatted(line2);
         }
     }
@@ -102,7 +103,7 @@ public class BurdensTab(ConfigWindow window) {
     }
 
     private void DrawBurdenList(Config config, ref bool changed) {
-        using var child = ImRaii.Child("BurdenList", new Vector2(-1, -30 * ImGuiHelpers.GlobalScale), false);
+        using var child = ImRaii.Child("burdenList", new Vector2(-1, -30 * ImGuiHelpers.GlobalScale), false);
         if (!child) return;
 
         for (var i = 0; i < config.Burdens.Count; i++) {
@@ -119,26 +120,24 @@ public class BurdensTab(ConfigWindow window) {
         using var id = ImRaii.PushId($"burdenList:{i}");
 
         var isSelected = selectedBurdenIndex == i;
-        var cursorPosition = ImGui.GetCursorPos();
+        var (icon, label) = Utils.GetBurdenDisplay(burden);
         var selectableSize = ImGuiHelpers.ScaledVector2(ImGui.GetContentRegionAvail().X, 24);
 
-        if (ImGui.Selectable("##selectable", isSelected, ImGuiSelectableFlags.AllowDoubleClick, selectableSize)) {
-            selectedBurdenIndex = i;
-        }
+        using (ImCursor.Excursion()) {
+            if (ImGui.Selectable("##selectable", isSelected, ImGuiSelectableFlags.AllowDoubleClick, selectableSize)) {
+                selectedBurdenIndex = i;
+            }
 
-        var (icon, label) = Utils.GetBurdenDisplay(burden);
-
-        using (var drag = burdenDragDrop.Drag(i)) {
-            if (drag) ImGui.Text($"Reorder: {label}");
-        }
-        using (var drop = burdenDragDrop.Drop(i)) {
-            if (drop) {
-                config.Burdens.Move(drop.SourceIndex, i, ref selectedBurdenIndex);
-                changed = true;
+            using (var drag = burdenDragDrop.Drag(i)) {
+                if (drag) ImGui.Text($"Reorder: {label}");
+            }
+            using (var drop = burdenDragDrop.Drop(i)) {
+                if (drop) {
+                    config.Burdens.Move(drop.SourceIndex, i, ref selectedBurdenIndex);
+                    changed = true;
+                }
             }
         }
-
-        ImGui.SetCursorPos(cursorPosition);
 
         if (icon.GetTexture() is { } texture) {
             using var wrap = texture.GetWrapOrEmpty();
@@ -147,8 +146,7 @@ public class BurdensTab(ConfigWindow window) {
             ImGui.SameLine();
         }
 
-        var labelSize = ImGui.CalcTextSize(label);
-        ImGui.SetCursorPosY(ImGui.GetCursorPos().Y + ((selectableSize.Y - labelSize.Y) / 2));
+        ImCursor.ToNestedRectY(ImGui.CalcTextSize(label), selectableSize);
         if (burden.Enabled) {
             ImGui.Text(label);
         } else {
@@ -157,7 +155,7 @@ public class BurdensTab(ConfigWindow window) {
     }
 
     private void DrawBurden(Burden burden, ref bool changed) {
-        using var child = ImRaii.Child("BurdenDetails");
+        using var child = ImRaii.Child("burdenDetails");
         if (!child) return;
 
         var startCursor = ImGui.GetCursorPos();
@@ -172,10 +170,9 @@ public class BurdensTab(ConfigWindow window) {
         using (ImCursor.Excursion()) {
             var deleteButtonWidth = ImGuiComponents.GetIconButtonWithTextWidth(FontAwesomeIcon.TrashAlt, "Delete");
             var cloneButtonWidth = ImGuiComponents.GetIconButtonWithTextWidth(FontAwesomeIcon.Clone, "Clone");
+            var currentPos = new ImFixedCursor(startCursor + new Vector2(ImGui.GetContentRegionAvail().X, 0));
 
-            var currentPos = startCursor + new Vector2(ImGui.GetContentRegionAvail().X - deleteButtonWidth, 0);
-            ImGui.SetCursorPos(currentPos);
-
+            currentPos.X -= deleteButtonWidth;
             using (ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
                 if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.TrashAlt, "Delete")) {
                     Plugin.Config.Burdens.Remove(burden);
@@ -187,8 +184,6 @@ public class BurdensTab(ConfigWindow window) {
             ImGuiEx.HoverTooltip("Delete burden\n(hold shift)");
 
             currentPos.X -= cloneButtonWidth + ImGui.GetStyle().ItemSpacing.X;
-            ImGui.SetCursorPos(currentPos);
-
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Clone, "Clone")) {
                 var copy = burden.Clone();
                 Plugin.Config.Burdens.Add(copy);
@@ -245,7 +240,7 @@ public class BurdensTab(ConfigWindow window) {
         var buttonWidth = ImGuiComponents.GetIconButtonWithTextWidth(icon, text);
 
         ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - buttonWidth);
+        ImCursor.X += ImGui.GetContentRegionAvail().X - buttonWidth;
 
         if (ImGuiComponents.IconButtonWithText(icon, text)) {
             var token = window.SubjectSelectorSlot.Acquire(burden.Guid);
@@ -267,7 +262,7 @@ public class BurdensTab(ConfigWindow window) {
         var buttonWidth = ImGuiComponents.GetIconButtonWithTextWidth(icon, text);
 
         ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - buttonWidth);
+        ImCursor.X += ImGui.GetContentRegionAvail().X - buttonWidth;
 
         if (ImGuiComponents.IconButtonWithText(icon, text)) {
             burden.Rules.Add(new Rule {
@@ -305,75 +300,69 @@ public class BurdensTab(ConfigWindow window) {
         var aliasColor = ImGuiEx.GetFadedColor(ImGuiColors.DalamudViolet, fadeMultiplier);
         var overrideCapColor = ImGuiEx.GetFadedColor(ImGuiColors.ParsedGold, fadeMultiplier);
 
-        using var style = ImRaii.PushStyle( ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0));
+        using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0));
 
         ImGuiEx.DrawRoundedBackground(rowHeight, bgCol, new Vector4(1, 1, 1, 0.1f));
 
         var startCursor = ImGui.GetCursorPos();
 
         var subjectTypeName = subject.Type.GetDisplayName();
-        ImGui.TextColored(typeColor, subjectTypeName);
-
         var subjectDetails = Plugin.Evaluator.GetDetails(subject);
-        string subjectName;
-        if (subjectDetails != null) {
-            if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(subjectDetails.IconId, subjectDetails.UseHqIcon)) is { } texture) {
-                using var wrap = texture.GetWrapOrEmpty();
-                ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(rowHeight / 2, rowHeight / 2), tintCol: iconTint);
-                ImGui.SameLine();
-            }
-            subjectName = subjectDetails.Name;
-        } else {
-            subjectName = $"ID={subject.Id}";
-        }
+        var subjectName = subjectDetails != null ? subjectDetails.Name : $"ID={subject.Id}";
 
-        if (subject.Quality != SubjectQuality.Any) {
-            ImGui.TextColored(qualityColor, $"{subject.Quality.GetDisplayName()}");
-            ImGui.SameLine();
-        }
+        ImCursor.X += 4 * ImGuiHelpers.GlobalScale;
+        using (ImRaii.Group()) {
+            ImGui.TextColored(typeColor, subjectTypeName);
 
-        ImGui.TextColored(nameColor, subjectName);
-
-        if (subject.Alias is not null) {
-            ImGui.SameLine();
-            ImGui.TextColored(aliasColor, $"({subject.Alias})");
-        }
-
-        if (subjectDetails != null) {
-            ImGui.SameLine();
-            if (ImGui.GetIO().KeyShift) {
-                ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeldPercentage.ToString(Utils.PercentDisplayFormat)}%"
-                                             + $"  |  {subjectDetails.QuantityMissing.ToString(Utils.UintDisplayFormat)} missing");
-            } else {
-                ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeld.ToString(Utils.UintDisplayFormat)}");
-                ImGui.SameLine();
-                ImGui.TextColored(typeColor, "/");
-                ImGui.SameLine();
-                if (subject.OverrideCap is not null) {
-                    ImGui.TextColored(overrideCapColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)} *");
-                } else {
-                    ImGui.TextColored(typeColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)}");
+            if (subjectDetails != null) {
+                if (Service.TextureProvider.GetFromGameIcon(new GameIconLookup(subjectDetails.IconId, subjectDetails.UseHqIcon)) is { } texture) {
+                    using var wrap = texture.GetWrapOrEmpty();
+                    ImGui.Image(wrap.Handle, ImGuiHelpers.ScaledVector2(rowHeight / 2, rowHeight / 2), tintCol: iconTint);
+                    ImGui.SameLine();
                 }
             }
-        } else {
-            if (subject.OverrideCap is { } overrideCap) {
+
+            if (subject.Quality != SubjectQuality.Any) {
+                ImGui.TextColored(qualityColor, $"{subject.Quality.GetDisplayName()}");
                 ImGui.SameLine();
-                ImGui.TextColored(overrideCapColor, $"(Cap = {overrideCap.ToString(Utils.UintDisplayFormat)})");
+            }
+
+            ImGui.TextColored(nameColor, subjectName);
+
+            if (subject.Alias is not null) {
+                ImGui.SameLine();
+                ImGui.TextColored(aliasColor, $"({subject.Alias})");
+            }
+
+            if (subjectDetails != null) {
+                ImGui.SameLine();
+                if (ImGui.GetIO().KeyShift) {
+                    ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeldPercentage.ToString(Utils.PercentDisplayFormat)}%"
+                                                 + $"  |  {subjectDetails.QuantityMissing.ToString(Utils.UintDisplayFormat)} missing");
+                } else {
+                    ImGui.TextColored(typeColor, $"  {subjectDetails.QuantityHeld.ToString(Utils.UintDisplayFormat)}");
+                    ImGui.SameLine();
+                    ImGui.TextColored(typeColor, "/");
+                    ImGui.SameLine();
+                    if (subject.OverrideCap is not null) {
+                        ImGui.TextColored(overrideCapColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)} *");
+                    } else {
+                        ImGui.TextColored(typeColor, $"{subjectDetails.EffectiveCap.ToString(Utils.UintDisplayFormat)}");
+                    }
+                }
+            } else {
+                if (subject.OverrideCap is { } overrideCap) {
+                    ImGui.SameLine();
+                    ImGui.TextColored(overrideCapColor, $"(Cap = {overrideCap.ToString(Utils.UintDisplayFormat)})");
+                }
             }
         }
 
-        Vector2 currentPos;
+        var currentPos = new ImFixedCursor(startCursor + new Vector2(ImGui.GetContentRegionAvail().X, (rowHeight / 2) - (ImGui.GetFrameHeight() / 2)));
         {
             var buttonIcon = FontAwesomeIcon.TrashAlt;
             var buttonText = "";
-            currentPos =
-                startCursor
-                + new Vector2(
-                    ImGui.GetContentRegionAvail().X - ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) - ImGui.GetStyle().ItemSpacing.X,
-                    (rowHeight / 2) - (ImGui.GetFrameHeight() / 2)
-                );
-
-            ImGui.SetCursorPos(currentPos);
+            currentPos.X -= ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) + ImGui.GetStyle().ItemSpacing.X;
             using (ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
                 if (ImGuiComponents.IconButton(buttonIcon)) {
                     burden.Subjects.RemoveAt(i);
@@ -386,7 +375,6 @@ public class BurdensTab(ConfigWindow window) {
             var buttonIcon = FontAwesomeIcon.Feather;
             var buttonText = "";
             currentPos.X -= ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) + ImGui.GetStyle().ItemSpacing.X;
-            ImGui.SetCursorPos(currentPos);
             if (ImGuiComponents.IconButton(buttonIcon)) {
                 editingAlias = subject.Alias ?? "";
                 editingOverrideCap = subjectDetails?.EffectiveCap ?? 999;
@@ -400,7 +388,6 @@ public class BurdensTab(ConfigWindow window) {
             var buttonIcon = subject.Enabled ? FontAwesomeIcon.Eye : FontAwesomeIcon.EyeSlash;
             var buttonText = "";
             currentPos.X -= ImGuiComponents.GetIconButtonWithTextWidth(buttonIcon, buttonText) + ImGui.GetStyle().ItemSpacing.X;
-            ImGui.SetCursorPos(currentPos);
             if (ImGuiComponents.IconButton(buttonIcon)) {
                 subject.Enabled = !subject.Enabled;
                 changed = true;
@@ -541,7 +528,7 @@ public class BurdensTab(ConfigWindow window) {
         using (ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(4, 0)))
         using (ImCursor.Excursion()) {
             var buttonWidth = ImGuiComponents.GetIconButtonWithTextWidth(FontAwesomeIcon.TrashAlt, "");
-            var currentPos = headerStartCursor + new Vector2(headerStartAvail.X - buttonWidth, headerExtraPadding * ImGuiHelpers.GlobalScale);
+            var currentPos = headerStartCursor + new Vector2(headerStartAvail.X - buttonWidth - ImGui.GetStyle().ItemSpacing.X, headerExtraPadding * ImGuiHelpers.GlobalScale);
             deletePos = currentPos;
             RenderDeleteButton(deletePos, ref changed);
             currentPos.X -= buttonWidth + ImGui.GetStyle().ItemSpacing.X;
