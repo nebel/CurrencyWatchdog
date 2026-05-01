@@ -44,7 +44,7 @@ public class ConfigWindow : Dalamud.Interface.Windowing.Window {
 
     public override void OnOpen() {
         base.OnOpen();
-        backupConfig = Plugin.Config.Clone();
+        backupConfig = Plugin.Config.Clone(keepGuid: true);
     }
 
     public override void OnClose() {

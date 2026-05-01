@@ -24,14 +24,14 @@ public class Config : IPluginConfiguration {
 
     public List<Burden> Burdens { get; set; } = [];
 
-    public Config Clone() {
+    public Config Clone(bool keepGuid = false) {
         return new Config {
             Version = Version,
             Enabled = Enabled,
             OverlayConfig = OverlayConfig with { },
             PanelConfig = PanelConfig with { },
             ChatConfig = ChatConfig with { },
-            Burdens = Burdens.Select(x => x.Clone()).ToList(),
+            Burdens = Burdens.Select(x => x.Clone(keepGuid)).ToList(),
         };
     }
 }
@@ -107,13 +107,13 @@ public class Burden {
     public int? PanelLimit { get; set; }
     public int? ChatLimit { get; set; }
 
-    public Burden Clone() {
+    public Burden Clone(bool keepGuid = false) {
         return new Burden {
-            Guid = Guid.NewGuid(),
+            Guid = keepGuid ? Guid : Guid.NewGuid(),
             Enabled = Enabled,
             Name = Name,
             Subjects = Subjects.Select(x => x with { }).ToList(),
-            Rules = Rules.Select(x => x.Clone()).ToList(),
+            Rules = Rules.Select(x => x.Clone(keepGuid)).ToList(),
             PanelLimit = PanelLimit,
             ChatLimit = ChatLimit,
         };
@@ -126,7 +126,7 @@ public record Subject {
     public uint Id { get; set; }
     public string? Alias { get; set; }
     public SubjectQuality Quality { get; set; } = SubjectQuality.Any;
-    public bool UseHqIcon { get; set; } = false;
+    public bool UseHqIcon { get; set; }
     public uint? OverrideCap { get; set; }
     public bool Enabled { get; set; } = true;
 }
@@ -141,9 +141,9 @@ public class Rule {
     public bool ShowChat { get; set; } = true;
     public RuleChatConfig? ChatConfig;
 
-    public Rule Clone() {
+    public Rule Clone(bool keepGuid = false) {
         return new Rule {
-            Guid = Guid.NewGuid(),
+            Guid = keepGuid ? Guid : Guid.NewGuid(),
             Enabled = Enabled,
             Conds = Conds.Select(x => x with { }).ToList(),
             ShowPanel = ShowPanel,

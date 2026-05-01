@@ -68,7 +68,7 @@ public class Evaluator {
                         continue;
 
                     var alertId = new AlertId(rule.Guid, subjectIndex);
-                    var alert = new Alert(alertId, rule, subjectDetails);
+                    var alert = new Alert(alertId, rule.Clone(keepGuid: true), subjectDetails);
 
                     if (Plugin.Config.OverlayConfig.Enabled && rule.ShowPanel) {
                         if (burdenPanelCounter.TryIncrement())
