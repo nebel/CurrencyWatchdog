@@ -11,7 +11,6 @@ using static CurrencyWatchdog.Expressions.SubjectExpression;
 
 namespace CurrencyWatchdog.Configuration;
 
-[Serializable]
 public class Config : IPluginConfiguration {
     public int Version { get; set; }
 
@@ -37,7 +36,6 @@ public class Config : IPluginConfiguration {
     }
 }
 
-[Serializable]
 public record OverlayConfig {
     public bool Enabled { get; set; } = true;
     public bool HideInDuty { get; set; } = true;
@@ -62,7 +60,6 @@ public record OverlayConfig {
     public float PanelWidth { get; set; } = 90f;
 }
 
-[Serializable]
 public record PanelConfig {
     public string QuantityTemplate { get; set; } = "{h}";
     public Vector4 QuantityColor { get; set; } = KnownColor.White.Vector();
@@ -73,7 +70,6 @@ public record PanelConfig {
     public Vector4 BackdropColor { get; set; } = KnownColor.Black.Vector() with { W = 0.5f };
 }
 
-[Serializable]
 public record ChatConfig {
     public bool Enabled { get; set; } = true;
 
@@ -97,7 +93,6 @@ public record ChatConfig {
     public Vector4 SuffixOutlineColor { get; set; } = KnownColor.Black.Vector();
 }
 
-[Serializable]
 public class Burden {
     public Guid Guid { get; set; } = Guid.NewGuid();
     public bool Enabled { get; set; } = true;
@@ -123,7 +118,6 @@ public class Burden {
     }
 }
 
-[Serializable]
 public record Subject {
     public SubjectType Type { get; set; } = SubjectType.Item;
     public uint Id { get; set; }
@@ -134,7 +128,6 @@ public record Subject {
     public bool Enabled { get; set; } = true;
 }
 
-[Serializable]
 public class Rule {
     public Guid Guid { get; set; } = Guid.NewGuid();
     public bool Enabled { get; set; } = true;
@@ -157,7 +150,6 @@ public class Rule {
     }
 }
 
-[Serializable]
 public record RulePanelConfig {
     public string? QuantityTemplate { get; set; }
     public Vector4? QuantityColor { get; set; }
@@ -168,7 +160,6 @@ public record RulePanelConfig {
     public Vector4? BackdropColor { get; set; }
 }
 
-[Serializable]
 public record RuleChatConfig {
     public string? Message { get; set; }
     public Vector4? MessageColor { get; set; }
@@ -178,7 +169,6 @@ public record RuleChatConfig {
     public Vector4? SuffixOutlineColor { get; set; }
 }
 
-[Serializable]
 public enum LayoutDirection {
     [Display(Name = "Right (extending down)", Order = 0)]
     RightDown,
@@ -198,7 +188,6 @@ public enum LayoutDirection {
     LeftUp,
 }
 
-[Serializable]
 public enum LayoutWrap {
     [Display(Name = "None (don't wrap)")]
     None,
@@ -206,13 +195,11 @@ public enum LayoutWrap {
     WrapAtSize,
 }
 
-[Serializable]
 public enum IconSideType {
     Left,
     Right,
 }
 
-[Serializable]
 public enum SubjectType {
     [Display(Name = "Item")]
     Item,
@@ -242,19 +229,16 @@ public enum SubjectType {
     LeveAllowance,
 }
 
-[Serializable]
 public record Spacing(float Left, float Right, float Top, float Bottom) {
     public float Horizontal => Left + Right;
     public float Vertical => Top + Bottom;
 }
 
-[Serializable]
 public record HorizontalSpacing(float Left, float Right) {
     public static readonly HorizontalSpacing Zero = new(0, 0);
     public float Total => Left + Right;
 }
 
-[Serializable]
 public enum ChatAlertZoneAction {
     [Display(Name = "Do nothing")]
     None,
@@ -262,7 +246,6 @@ public enum ChatAlertZoneAction {
     All,
 }
 
-[Serializable]
 public enum ChatAlertUpdateAction {
     [Display(Name = "Do nothing")]
     None,
@@ -272,7 +255,6 @@ public enum ChatAlertUpdateAction {
     New,
 }
 
-[Serializable]
 public enum GameFont {
     Axis,
     MiedingerMed,
@@ -282,20 +264,17 @@ public enum GameFont {
     JupiterLarge,
 }
 
-[Serializable]
 public enum FontOutlineType {
     None,
     Normal,
     Strong,
 }
 
-[Serializable]
 public enum PanelSizingType {
     Auto,
     Fixed,
 }
 
-[Serializable]
 public enum SubjectQuality {
     [Display(Name = "Any")]
     Any,
@@ -305,7 +284,6 @@ public enum SubjectQuality {
     High,
 }
 
-[Serializable]
 public class Jurisdiction {
     public Guid Guid { get; set; } = Guid.NewGuid();
     public bool Enabled { get; set; } = true;
@@ -324,13 +302,11 @@ public class Jurisdiction {
     }
 }
 
-[Serializable]
 public record PanelVisibility {
     public PanelVisibilityKind? Default { get; set; }
     public PanelVisibilityKind? InDuty { get; set; }
 }
 
-[Serializable]
 public enum PanelVisibilityKind {
     [Display(Name = "Hide Panels")]
     Hide,
@@ -343,13 +319,11 @@ public enum PanelVisibilityKind {
 public abstract record Activity {
     public bool Enabled { get; set; } = true;
 
-    [Serializable]
-    public record ZoneActivity : Activity {
+        public record ZoneActivity : Activity {
         public uint RowId { get; set; }
     }
 
-    [Serializable]
-    public record ContentActivity : Activity {
+        public record ContentActivity : Activity {
         public uint RowId { get; set; }
     }
 }

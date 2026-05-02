@@ -7,7 +7,6 @@ namespace CurrencyWatchdog.Expressions;
 [JsonDerivedType(typeof(Constant), "Constant")]
 [JsonDerivedType(typeof(Metric), "Metric")]
 public abstract record SubjectExpression {
-    [Serializable]
     public enum MetricType {
         [Display(Name = "Cap")]
         Cap,
@@ -27,13 +26,10 @@ public abstract record SubjectExpression {
         LimitedQuantityMissing,
     }
 
-    [Serializable]
     public record Constant(decimal Value) : SubjectExpression;
 
-    [Serializable]
     public record Metric(MetricType Type) : SubjectExpression;
 
-    [Serializable]
     public enum Operator {
         [Display(Name = ">")]
         GreaterThan,
@@ -47,6 +43,5 @@ public abstract record SubjectExpression {
         LessThan,
     }
 
-    [Serializable]
     public record Cond(SubjectExpression Left, Operator Operator, SubjectExpression Right, bool Negate = false);
 }
