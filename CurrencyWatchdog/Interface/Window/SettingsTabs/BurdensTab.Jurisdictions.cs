@@ -212,7 +212,7 @@ public partial class BurdensTab {
             }
 
             var visDefault = juris.Visibility.Default;
-            if (ImGuiEx.NullableEnumCombo("By default...", PanelVisibilityKind.Show, ref visDefault)) {
+            if (ImGuiEx.NullableEnumCombo("When not in a Duty...", PanelVisibilityKind.Show, ref visDefault)) {
                 juris.Visibility = juris.Visibility with { Default = visDefault };
                 changed = true;
             }
