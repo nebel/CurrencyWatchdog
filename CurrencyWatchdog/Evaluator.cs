@@ -70,7 +70,7 @@ public class Evaluator {
 
                     var alertId = new AlertId(rule.Guid, subjectIndex);
                     var jurisdictions =
-                        burden.Jurisdictions.Count > 1
+                        burden.Jurisdictions.Count > 0
                             ? burden.Jurisdictions.Select(j => j.Clone(keepGuid: true)).ToArray()
                             : [];
                     var alert = new Alert(alertId, rule.Clone(keepGuid: true), jurisdictions, subjectDetails);
