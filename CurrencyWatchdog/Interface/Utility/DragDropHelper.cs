@@ -42,7 +42,7 @@ public sealed class DragDropHelper<T>(string payloadId) {
                         ImGui.TextColored(ImGuiColors.SuccessForeground, $"Copy");
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new ArgumentOutOfRangeException($"Unknown ${nameof(DragAction)}: {dragAction}");
                 }
                 ImCursor.SameLineSpace();
                 ImGui.Text($"{sourceName}");

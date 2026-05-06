@@ -128,7 +128,7 @@ public class ConfigWindow : Dalamud.Interface.Windowing.Window {
         using (ImRaii.Disabled(!ImGui.GetIO().KeyShift)) {
             if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Undo, "Revert")) {
                 if (backupConfig != null) {
-                    Plugin.ConfigManager.LoadObject(backupConfig.Clone());
+                    Plugin.ConfigManager.LoadObject(backupConfig.Clone(keepGuid: true));
                 }
             }
         }
