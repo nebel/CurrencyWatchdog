@@ -16,8 +16,8 @@ using System.Text;
 namespace CurrencyWatchdog.Interface.Window.SettingsTabs;
 
 public partial class BurdensTab {
-    private readonly DragDropHelper jurisdictionDragDrop = new("JURISDICTION");
-    private readonly CrossDragDropHelper<Activity> activityDragDrop = new("ACTIVITY");
+    private readonly DragDropHelper<Jurisdiction> jurisdictionDragDrop = new("JURIS");
+    private readonly DragDropHelper<Activity> activityDragDrop = new("ACTIVITY");
 
     private void DrawCreateJurisdictionsButton(Burden burden, ref bool changed) {
         if (burden.Jurisdictions.Count != 0)
@@ -117,6 +117,7 @@ public partial class BurdensTab {
     private void DrawJurisdiction(Burden burden, int i, ref bool changed, ref bool hasMatch) {
         var juris = burden.Jurisdictions[i];
         using var id = ImRaii.PushId($"jurisdiction:{i}");
+        var hoverId = ImGui.GetID("hover");
 
         void RenderCloneButton(Vector2 currentPos, ref bool changed) {
             ImGui.SetCursorPos(currentPos);
@@ -176,12 +177,12 @@ public partial class BurdensTab {
             header = ImGui.CollapsingHeader(headerLabel + $"###jurisdictionHeader:{i}");
         }
 
-        using (var drag = jurisdictionDragDrop.Drag(i)) {
-            if (drag) ImGui.Text($"Reorder: {headerLabel}");
+        using (var drag = jurisdictionDragDrop.Drag(hoverId, burden.Jurisdictions, i)) {
+            if (drag) drag.SetSourceName(headerLabel);
         }
-        using (var drop = jurisdictionDragDrop.Drop(i)) {
+        using (var drop = jurisdictionDragDrop.Drop(hoverId, burden.Jurisdictions, DragMask.Reorder)) {
             if (drop) {
-                burden.Jurisdictions.Move(drop.SourceIndex, i);
+                burden.Jurisdictions.Swap(drop.SourceIndex, i);
                 changed = true;
             }
         }
@@ -262,7 +263,9 @@ public partial class BurdensTab {
     private void DrawActivity(Jurisdiction juris, Activity activity, int i, Vector2 typeBounds, ref bool changed) {
         const float rowHeight = 36;
 
-        var bgCol = activityDragDrop.GetDragState(juris.Activities, i) switch {
+        var hoverId = ImGui.GetID("hover");
+
+        var bgCol = activityDragDrop.GetDragState(hoverId) switch {
             DragState.None => new Vector4(1, 1, 1, 0.05f),
             DragState.Source => new Vector4(1, 1, 1, 0.15f),
             DragState.Target => new Vector4(1, 1, 0, 0.15f),
@@ -325,20 +328,19 @@ public partial class BurdensTab {
         ImGui.SetCursorPos(startCursor);
         ImGui.InvisibleButton("##dragDropFrame", new Vector2(-1, rowHeight * ImGuiHelpers.GlobalScale));
 
-        using (var drag = activityDragDrop.Drag(juris.Activities, i)) {
-            if (drag) ImGui.Text($"Reorder: {name}");
+        using (var drag = activityDragDrop.Drag(hoverId, juris.Activities, i)) {
+            if (drag) drag.SetSourceName(name);
         }
-
-        using (var drop = activityDragDrop.Drop(juris.Activities, i)) {
+        using (var drop = activityDragDrop.Drop(hoverId, juris.Activities, DragMask.Any)) {
             if (drop) {
-                if (ReferenceEquals(drop.SourceList, juris.Activities)) {
-                    juris.Activities.Move(drop.SourceIndex, i);
+                if (drop.Action == DragAction.Reorder) {
+                    juris.Activities.Swap(drop.SourceIndex, i);
+                } else if (drop.Action == DragAction.Copy) {
+                    juris.Activities.Insert(i, drop.Target with { });
                 } else {
-                    var target = drop.SourceList[drop.SourceIndex];
                     drop.SourceList.RemoveAt(drop.SourceIndex);
-                    juris.Activities.Insert(i, target);
+                    juris.Activities.Insert(i, drop.PopTarget());
                 }
-
                 changed = true;
             }
         }

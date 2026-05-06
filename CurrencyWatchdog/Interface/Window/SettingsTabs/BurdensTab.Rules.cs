@@ -19,7 +19,7 @@ public partial class BurdensTab {
     private const string PopupEditExpression = "currency-watchdog-edit-expression";
     private const string PopupEditOperator = "currency-watchdog-edit-operator";
 
-    private readonly DragDropHelper ruleDragDrop = new("RULE");
+    private readonly DragDropHelper<Rule> ruleDragDrop = new("RULE");
 
     private string editingConstant = "";
 
@@ -61,6 +61,7 @@ public partial class BurdensTab {
     private void DrawRule(Burden burden, int i, ref bool changed) {
         var rule = burden.Rules[i];
         using var id = ImRaii.PushId($"rule:{i}");
+        var hoverId = ImGui.GetID("hover");
 
         void CloneRuleButton(Vector2 currentPos, ref bool changed) {
             ImGui.SetCursorPos(currentPos);
@@ -110,12 +111,12 @@ public partial class BurdensTab {
             header = ImGui.CollapsingHeader(headerLabel + $"###ruleHeader:{i}");
         }
 
-        using (var drag = burdenDragDrop.Drag(i)) {
-            if (drag) ImGui.Text($"Reorder: {headerLabel}");
+        using (var drag = ruleDragDrop.Drag(hoverId, burden.Rules, i)) {
+            if (drag) drag.SetSourceName(headerLabel);
         }
-        using (var drop = burdenDragDrop.Drop(i)) {
+        using (var drop = ruleDragDrop.Drop(hoverId, burden.Rules, DragMask.Reorder)) {
             if (drop) {
-                burden.Rules.Move(drop.SourceIndex, i);
+                burden.Rules.Swap(drop.SourceIndex, i);
                 changed = true;
             }
         }

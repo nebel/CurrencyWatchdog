@@ -17,7 +17,7 @@ namespace CurrencyWatchdog.Interface.Window.SettingsTabs;
 public partial class BurdensTab {
     private const string PopupEditSubject = "currency-watchdog-edit-alias";
 
-    private readonly DragDropHelper subjectDragDrop = new("SUBJECT");
+    private readonly DragDropHelper<Subject> subjectDragDrop = new("SUBJECT");
 
     private string editingAlias = "";
     private uint editingOverrideCap;
@@ -68,7 +68,9 @@ public partial class BurdensTab {
     private void DrawSubject(Burden burden, Subject subject, int i, ref bool changed) {
         const float rowHeight = 40;
 
-        var bgCol = subjectDragDrop.GetDragState(i) switch {
+        var hoverId = ImGui.GetID("hover");
+
+        var bgCol = subjectDragDrop.GetDragState(hoverId) switch {
             DragState.None => new Vector4(1, 1, 1, 0.05f),
             DragState.Source => new Vector4(1, 1, 1, 0.15f),
             DragState.Target => new Vector4(1, 1, 0, 0.15f),
@@ -183,13 +185,13 @@ public partial class BurdensTab {
         ImGui.SetCursorPos(startCursor);
         ImGui.InvisibleButton("##dragDropFrame", new Vector2(-1, rowHeight * ImGuiHelpers.GlobalScale));
 
-        using (var drag = subjectDragDrop.Drag(i)) {
-            if (drag) ImGui.Text($"Reorder: {subjectName}");
+        using (var drag = subjectDragDrop.Drag(hoverId, burden.Subjects, i)) {
+            if (drag) drag.SetSourceName(subjectName);
         }
 
-        using (var drop = subjectDragDrop.Drop(i)) {
+        using (var drop = subjectDragDrop.Drop(hoverId, burden.Subjects, DragMask.Reorder)) {
             if (drop) {
-                burden.Subjects.Move(drop.SourceIndex, i);
+                burden.Subjects.Swap(drop.SourceIndex, i);
                 changed = true;
             }
         }
