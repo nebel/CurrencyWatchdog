@@ -40,14 +40,14 @@ public static class Extensions {
     }
 
     extension<T>(IList<T> self) {
-        public void Move(int fromIndex, int toIndex) {
+        public void Swap(int fromIndex, int toIndex) {
             var item = self[fromIndex];
             self.RemoveAt(fromIndex);
             self.Insert(toIndex, item);
         }
 
-        public void Move(int fromIndex, int toIndex, ref int trackedIndex) {
-            self.Move(fromIndex, toIndex);
+        public void Swap(int fromIndex, int toIndex, ref int trackedIndex) {
+            self.Swap(fromIndex, toIndex);
 
             if (trackedIndex >= 0)
                 trackedIndex = AdjustIndexAfterMove(trackedIndex, fromIndex, toIndex);
