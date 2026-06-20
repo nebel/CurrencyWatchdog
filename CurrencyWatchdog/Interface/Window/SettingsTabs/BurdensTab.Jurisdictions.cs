@@ -16,8 +16,8 @@ using System.Text;
 namespace CurrencyWatchdog.Interface.Window.SettingsTabs;
 
 public partial class BurdensTab {
-    private readonly DragDropHelper<Jurisdiction> jurisdictionDragDrop = new("JURIS");
-    private readonly DragDropHelper<Activity> activityDragDrop = new("ACTIVITY");
+    private readonly ListDragDrop<Jurisdiction> jurisdictionDragDrop = new("JURIS");
+    private readonly ListDragDrop<Activity> activityDragDrop = new("ACTIVITY");
 
     private void DrawCreateJurisdictionsButton(Burden burden, ref bool changed) {
         if (burden.Jurisdictions.Count != 0)
@@ -178,11 +178,11 @@ public partial class BurdensTab {
         }
 
         using (var drag = jurisdictionDragDrop.Drag(hoverId, burden.Jurisdictions, i)) {
-            if (drag) drag.SetSourceName(headerLabel);
+            if (drag) jurisdictionDragDrop.SourceName = headerLabel;
         }
         using (var drop = jurisdictionDragDrop.Drop(hoverId, burden.Jurisdictions, DragMask.Reorder)) {
-            if (drop) {
-                burden.Jurisdictions.Swap(drop.SourceIndex, i);
+            if (drop.Dropped && jurisdictionDragDrop.Element is { } el) {
+                el.Swap(i);
                 changed = true;
             }
         }
@@ -265,10 +265,10 @@ public partial class BurdensTab {
 
         var hoverId = ImGui.GetID("hover");
 
-        var bgCol = activityDragDrop.GetDragState(hoverId) switch {
-            DragState.None => new Vector4(1, 1, 1, 0.05f),
-            DragState.Source => new Vector4(1, 1, 1, 0.15f),
-            DragState.Target => new Vector4(1, 1, 0, 0.15f),
+        var bgCol = activityDragDrop.GetRole(hoverId) switch {
+            DragDropRole.None => new Vector4(1, 1, 1, 0.05f),
+            DragDropRole.Source => new Vector4(1, 1, 1, 0.15f),
+            DragDropRole.Target => new Vector4(1, 1, 0, 0.15f),
             _ => Vector4.Zero,
         };
 
@@ -329,17 +329,16 @@ public partial class BurdensTab {
         ImGui.InvisibleButton("##dragDropFrame", new Vector2(-1, rowHeight * ImGuiHelpers.GlobalScale));
 
         using (var drag = activityDragDrop.Drag(hoverId, juris.Activities, i)) {
-            if (drag) drag.SetSourceName(name);
+            if (drag) activityDragDrop.SourceName = name;
         }
         using (var drop = activityDragDrop.Drop(hoverId, juris.Activities, DragMask.Any)) {
-            if (drop) {
-                if (drop.Action == DragAction.Reorder) {
-                    juris.Activities.Swap(drop.SourceIndex, i);
-                } else if (drop.Action == DragAction.Copy) {
-                    juris.Activities.Insert(i, drop.Target with { });
+            if (drop.Dropped && activityDragDrop.Element is { } el) {
+                if (activityDragDrop.DragAction == DragAction.Reorder) {
+                    el.Swap(i);
+                } else if (activityDragDrop.DragAction == DragAction.Copy) {
+                    juris.Activities.Insert(i, el.Get() with { });
                 } else {
-                    drop.SourceList.RemoveAt(drop.SourceIndex);
-                    juris.Activities.Insert(i, drop.PopTarget());
+                    juris.Activities.Insert(i, el.Pop());
                 }
                 changed = true;
             }

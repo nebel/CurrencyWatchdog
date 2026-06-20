@@ -19,7 +19,7 @@ public partial class BurdensTab {
     private const string PopupEditExpression = "currency-watchdog-edit-expression";
     private const string PopupEditOperator = "currency-watchdog-edit-operator";
 
-    private readonly DragDropHelper<Rule> ruleDragDrop = new("RULE");
+    private readonly ListDragDrop<Rule> ruleDragDrop = new("RULE");
 
     private string editingConstant = "";
 
@@ -112,11 +112,11 @@ public partial class BurdensTab {
         }
 
         using (var drag = ruleDragDrop.Drag(hoverId, burden.Rules, i)) {
-            if (drag) drag.SetSourceName(headerLabel);
+            if (drag) ruleDragDrop.SourceName = headerLabel;
         }
         using (var drop = ruleDragDrop.Drop(hoverId, burden.Rules, DragMask.Reorder)) {
-            if (drop) {
-                burden.Rules.Swap(drop.SourceIndex, i);
+            if (drop.Dropped && ruleDragDrop.Element is { } el) {
+                el.Swap(i);
                 changed = true;
             }
         }

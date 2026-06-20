@@ -12,7 +12,7 @@ using System.Numerics;
 namespace CurrencyWatchdog.Interface.Window.SettingsTabs;
 
 public partial class BurdensTab(ConfigWindow window) {
-    private readonly DragDropHelper<Burden> burdenDragDrop = new("BURDEN");
+    private readonly ListDragDrop<Burden> burdenDragDrop = new("BURDEN");
 
     private int selectedBurdenIndex = -1;
 
@@ -112,32 +112,32 @@ public partial class BurdensTab(ConfigWindow window) {
             }
 
             using (var drag = burdenDragDrop.Drag(hoverId, config.Burdens, i)) {
-                if (drag) drag.SetSourceName(label);
+                if (drag) burdenDragDrop.SourceName = label;
             }
             using (var drop = burdenDragDrop.Drop(hoverId, config.Burdens, DragMask.Reorder)) {
-                if (drop) {
-                    config.Burdens.Swap(drop.SourceIndex, i, ref selectedBurdenIndex);
+                if (drop.Dropped && burdenDragDrop.Element is { } el) {
+                    el.Swap(i, ref selectedBurdenIndex);
                     changed = true;
                 }
             }
 
             using (var drop = ruleDragDrop.Drop(hoverId, burden.Rules, DragMask.MoveOrCopy)) {
-                if (drop.Dropped) {
-                    if (drop.Action == DragAction.Copy) {
-                        burden.Rules.Add(drop.Target.Clone());
+                if (drop.Dropped && ruleDragDrop.Element is { } el) {
+                    if (ruleDragDrop.DragAction == DragAction.Copy) {
+                        burden.Rules.Add(el.Get().Clone());
                     } else {
-                        burden.Rules.Add(drop.PopTarget());
+                        burden.Rules.Add(el.Pop());
                     }
                     changed = true;
                 }
             }
 
             using (var drop = jurisdictionDragDrop.Drop(hoverId, burden.Jurisdictions, DragMask.MoveOrCopy)) {
-                if (drop.Dropped) {
-                    if (drop.Action == DragAction.Copy) {
-                        burden.Jurisdictions.Add(drop.Target.Clone());
+                if (drop.Dropped && jurisdictionDragDrop.Element is { } el) {
+                    if (jurisdictionDragDrop.DragAction == DragAction.Copy) {
+                        burden.Jurisdictions.Add(el.Get().Clone());
                     } else {
-                        burden.Jurisdictions.Add(drop.PopTarget());
+                        burden.Jurisdictions.Add(el.Pop());
                     }
                     changed = true;
                 }
