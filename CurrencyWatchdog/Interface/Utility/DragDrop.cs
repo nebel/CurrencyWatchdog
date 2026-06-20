@@ -1,6 +1,7 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using System;
+using System.Numerics;
 
 namespace CurrencyWatchdog.Interface.Utility;
 
@@ -43,6 +44,14 @@ public sealed class DragDropState(string payloadId) {
         return IsSource(id) ? DragState.Source : IsHovered(id) ? DragState.Target : DragState.None;
     }
 
+    private bool HasPayload() {
+        var payload = ImGui.GetDragDropPayload();
+        if (payload.IsNull)
+            return false;
+
+        return payload.IsDataType(payloadId);
+    }
+
     public bool CanDrop() {
         if (!sawTargetThisFrame) {
             HoverId = null;
@@ -53,17 +62,29 @@ public sealed class DragDropState(string payloadId) {
     }
 
     public bool IsActive() {
-        var wasActive = sawSourceThisFrame;
+        var hasPayload = HasPayload();
+        var sawSource = sawSourceThisFrame;
 
         sawSourceThisFrame = false;
         sawTargetThisFrame = false;
 
-        if (!ImGuiP.IsDragDropActive()) {
+        if (!hasPayload) {
             SourceId = null;
             return false;
         }
 
-        return wasActive;
+        if (!sawSource) {
+            using (new ImRaii.ColorDisposable()
+                       .Push(ImGuiCol.PopupBg, Vector4.Zero)
+                       .Push(ImGuiCol.Text, Vector4.Zero))
+            using (ImRaii.Tooltip()) {
+                ImGui.Text("(hide)");
+            }
+
+            return false;
+        }
+
+        return true;
     }
 }
 
