@@ -47,11 +47,11 @@ public partial class BurdensTab(ConfigWindow window) {
             var lineSpacing = size1 with { X = 0 };
 
             ImCursor.Position = cursor;
-            ImCursor.ToNestedRect(size1, avail, -lineSpacing);
+            ImCursor.ToNestedRect(size1, avail, ImAlign.Center, -lineSpacing);
             ImGui.TextUnformatted(line1);
 
             ImCursor.Position = cursor;
-            ImCursor.ToNestedRect(size2, avail, lineSpacing);
+            ImCursor.ToNestedRect(size2, avail, ImAlign.Center, lineSpacing);
             ImGui.TextUnformatted(line2);
         }
     }
@@ -151,7 +151,7 @@ public partial class BurdensTab(ConfigWindow window) {
             ImGui.SameLine();
         }
 
-        ImCursor.ToNestedRectY(ImGui.CalcTextSize(label), selectableSize);
+        ImCursor.ToNestedRect(ImGui.CalcTextSize(label), selectableSize, ImAlign.Left);
         if (burden.Enabled) {
             ImGui.Text(label);
         } else {

@@ -290,7 +290,7 @@ public partial class BurdensTab {
 
         ImCursor.Position = startCursor + new Vector2(dividerOffset + (xSpacing * 2), 0);
         if (sub.Length == 0) {
-            ImCursor.ToNestedRectY(typeBounds, new Vector2(0, rowHeight));
+            ImCursor.ToNestedRect(typeBounds, new Vector2(0, rowHeight), ImAlign.Left);
             ImGui.TextColored(nameColor, name);
         } else {
             using (ImRaii.Group()) {
