@@ -17,7 +17,7 @@ namespace CurrencyWatchdog.Interface.Window.SettingsTabs;
 public partial class BurdensTab {
     private const string PopupEditSubject = "currency-watchdog-edit-alias";
 
-    private readonly DragDropHelper<Subject> subjectDragDrop = new("SUBJECT");
+    private readonly ListDragDrop<Subject> subjectDragDrop = new("SUBJECT");
 
     private string editingAlias = "";
     private uint editingOverrideCap;
@@ -186,12 +186,12 @@ public partial class BurdensTab {
         ImGui.InvisibleButton("##dragDropFrame", new Vector2(-1, rowHeight * ImGuiHelpers.GlobalScale));
 
         using (var drag = subjectDragDrop.Drag(hoverId, burden.Subjects, i)) {
-            if (drag) drag.SetSourceName(subjectName);
+            if (drag) subjectDragDrop.SourceName = subjectName;
         }
 
         using (var drop = subjectDragDrop.Drop(hoverId, burden.Subjects, DragMask.Reorder)) {
-            if (drop) {
-                burden.Subjects.Swap(drop.SourceIndex, i);
+            if (drop.Dropped && subjectDragDrop.Element is { } el) {
+                el.Swap(i);
                 changed = true;
             }
         }
