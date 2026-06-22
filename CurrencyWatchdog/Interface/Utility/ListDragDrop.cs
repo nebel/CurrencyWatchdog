@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace CurrencyWatchdog.Interface.Utility;
 
 public sealed class ListDragDrop<T>(string payloadId) {
-    private readonly DragDropState state = new(payloadId);
+    private readonly DragDropState<uint> state = new(payloadId);
 
     private List<T>? SourceList { get; set; }
     private int? SourceIndex { get; set; }
@@ -16,10 +16,10 @@ public sealed class ListDragDrop<T>(string payloadId) {
     public DragAction DragAction { get; set; } = DragAction.None;
 
     public void EndFrame() {
-        if (!state.CanDrop())
+        if (!state.CheckHover())
             DragAction = DragAction.None;
 
-        if (state.IsActive()) {
+        if (state.CheckActive()) {
             DrawTooltip();
         } else {
             SourceList = null;
@@ -71,10 +71,10 @@ public sealed class ListDragDrop<T>(string payloadId) {
         if (!mask.Allows(DragAction))
             return result.Reject();
 
-        return result.TryAccept();
+        return result.Accept();
     }
 
-    public DragState GetDragState(uint id) => state.GetDragState(id);
+    public DragDropRole GetRole(uint id) => state.GetRole(id);
 
     public ListOperations<T>? Element => SourceList is { } list && SourceIndex is { } index ? new ListOperations<T>(list, index) : null;
 }

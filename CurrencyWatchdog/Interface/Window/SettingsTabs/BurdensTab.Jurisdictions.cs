@@ -265,10 +265,10 @@ public partial class BurdensTab {
 
         var hoverId = ImGui.GetID("hover");
 
-        var bgCol = activityDragDrop.GetDragState(hoverId) switch {
-            DragState.None => new Vector4(1, 1, 1, 0.05f),
-            DragState.Source => new Vector4(1, 1, 1, 0.15f),
-            DragState.Target => new Vector4(1, 1, 0, 0.15f),
+        var bgCol = activityDragDrop.GetRole(hoverId) switch {
+            DragDropRole.None => new Vector4(1, 1, 1, 0.05f),
+            DragDropRole.Source => new Vector4(1, 1, 1, 0.15f),
+            DragDropRole.Target => new Vector4(1, 1, 0, 0.15f),
             _ => Vector4.Zero,
         };
 
