@@ -3,16 +3,14 @@ using CurrencyWatchdog.Native.Parts;
 using Dalamud.Interface;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using KamiToolKit.Nodes;
-using KamiToolKit.Premade.Node;
-using KamiToolKit.Premade.Node.Simple;
 using System;
 using System.Drawing;
 using System.Numerics;
 
 namespace CurrencyWatchdog.Native;
 
-public class CurrencyNode : SimpleOverlayNode {
-    private readonly BackgroundImageNode backdropNode;
+public class CurrencyNode : ResNode {
+    private readonly ColorImageNode backdropNode;
     private readonly HqIconImageNode hqIconImageNode;
     private readonly TextNode quantityNode;
     private readonly TextNode labelNode;
@@ -20,7 +18,7 @@ public class CurrencyNode : SimpleOverlayNode {
     private HorizontalSpacing currentTextPadding = HorizontalSpacing.Zero;
 
     public CurrencyNode() {
-        backdropNode = new BackgroundImageNode {
+        backdropNode = new ColorImageNode {
             Color = new Vector4(0, 0, 0, 0.5f),
             Size = new Vector2(36.0f, 36.0f),
         };

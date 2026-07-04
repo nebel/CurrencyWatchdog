@@ -1,7 +1,6 @@
 using CurrencyWatchdog.Configuration;
-using CurrencyWatchdog.Watcher;
-using KamiToolKit.Extensions;
-using KamiToolKit.Overlay.UiOverlay;
+using Dalamud.Utility;
+using KamiToolKit.UiOverlay;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -15,7 +14,7 @@ public sealed class Overlay : IDisposable {
     private WatchdogContainerNode? container;
 
     public void FrameworkThreadInit() {
-        if (MainThreadSafety.TryAssertMainThread()) return;
+        ThreadSafety.AssertMainThread();
 
         Service.Log.Debug("Overlay::FrameworkThreadInit");
         overlayController = new OverlayController();
@@ -30,7 +29,8 @@ public sealed class Overlay : IDisposable {
     }
 
     public void UpdateConfig(Config config) {
-        if (MainThreadSafety.TryAssertMainThread()) return;
+        ThreadSafety.AssertMainThread();
+
         if (container is null) {
             Service.Log.Warning("Got config update event, but the node container is not ready yet. Skipping.");
             return;
@@ -40,7 +40,8 @@ public sealed class Overlay : IDisposable {
     }
 
     public void UpdateNodes(List<Alert> alerts) {
-        if (MainThreadSafety.TryAssertMainThread()) return;
+        ThreadSafety.AssertMainThread();
+
         if (container is null) {
             Service.Log.Warning("Got node update event, but the node container is not ready yet. Skipping.");
             return;
@@ -156,7 +157,8 @@ public sealed class Overlay : IDisposable {
     }
 
     public void ClearNodes() {
-        if (MainThreadSafety.TryAssertMainThread()) return;
+        ThreadSafety.AssertMainThread();
+
         if (container is null) {
             Service.Log.Warning("Got node update event, but the node container is not ready yet. Skipping.");
             return;

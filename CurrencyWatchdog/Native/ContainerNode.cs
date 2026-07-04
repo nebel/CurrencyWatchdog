@@ -1,6 +1,6 @@
 using CurrencyWatchdog.Configuration;
 using KamiToolKit.Enums;
-using KamiToolKit.Overlay.UiOverlay;
+using KamiToolKit.UiOverlay;
 using System.Collections.Generic;
 using System.Numerics;
 

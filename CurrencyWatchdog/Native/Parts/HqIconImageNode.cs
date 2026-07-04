@@ -1,4 +1,4 @@
-using KamiToolKit.Premade.Node.Simple;
+using KamiToolKit.Nodes.Simplified;
 using System.Numerics;
 
 namespace CurrencyWatchdog.Native.Parts;
