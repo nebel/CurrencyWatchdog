@@ -213,7 +213,7 @@ public partial class BurdensTab {
             }
 
             var visDefault = juris.Visibility.Default;
-            if (ImGuiEx.NullableEnumCombo("When not in a Duty...", PanelVisibilityKind.Show, ref visDefault)) {
+            if (ImGuiEx.NullableEnumCombo("By default...", PanelVisibilityKind.Show, ref visDefault)) {
                 juris.Visibility = juris.Visibility with { Default = visDefault };
                 changed = true;
             }
@@ -222,6 +222,13 @@ public partial class BurdensTab {
             var defaultVisInDuty = Plugin.Config.OverlayConfig.HideInDuty ? PanelVisibilityKind.Hide : PanelVisibilityKind.Show;
             if (ImGuiEx.NullableEnumCombo("When in a Duty...", defaultVisInDuty, ref visInDuty)) {
                 juris.Visibility = juris.Visibility with { InDuty = visInDuty };
+                changed = true;
+            }
+
+            var visInCombat = juris.Visibility.InCombat;
+            var defaultVisInCombat = Plugin.Config.OverlayConfig.HideInCombat ? PanelVisibilityKind.Hide : PanelVisibilityKind.Show;
+            if (ImGuiEx.NullableEnumCombo("When in Combat...", defaultVisInCombat, ref visInCombat)) {
+                juris.Visibility = juris.Visibility with { InCombat = visInCombat };
                 changed = true;
             }
 

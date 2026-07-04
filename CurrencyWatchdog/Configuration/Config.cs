@@ -39,6 +39,7 @@ public class Config : IPluginConfiguration {
 public record OverlayConfig {
     public bool Enabled { get; set; } = true;
     public bool HideInDuty { get; set; } = true;
+    public bool HideInCombat { get; set; }
     public Vector2 Position { get; set; } = new(400f, 200f);
     public float Scale { get; set; } = 1f;
     public float IconSize { get; set; } = 32f;
@@ -305,6 +306,7 @@ public class Jurisdiction {
 public record PanelVisibility {
     public PanelVisibilityKind? Default { get; set; }
     public PanelVisibilityKind? InDuty { get; set; }
+    public PanelVisibilityKind? InCombat { get; set; }
 }
 
 public enum PanelVisibilityKind {

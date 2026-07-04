@@ -31,6 +31,12 @@ public class OverlayTab {
             changed = true;
         }
 
+        var hideInCombat = overlay.HideInCombat;
+        if (ImGui.Checkbox("Hide in Combat", ref hideInCombat)) {
+            overlay.HideInCombat = hideInCombat;
+            changed = true;
+        }
+
         ImGuiEx.ConfigHeader("Layout Settings");
 
         var position = overlay.Position;

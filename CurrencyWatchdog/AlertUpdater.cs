@@ -291,27 +291,30 @@ public class OverlayUpdater {
         }
     }
 
-    private static DefaultPanelVisibility GetDefaultVisibility() {
-        return new DefaultPanelVisibility {
-            Default = PanelVisibilityKind.Show,
-            InDuty = Plugin.Config.OverlayConfig.HideInDuty ? PanelVisibilityKind.Hide : PanelVisibilityKind.Show,
-        };
+    private static PanelVisibilityKind GetDefaultVisibility() {
+        if (Plugin.Config.OverlayConfig.HideInDuty && ConditionWatcher.IsInDuty())
+            return PanelVisibilityKind.Hide;
+        if (Plugin.Config.OverlayConfig.HideInCombat && ConditionWatcher.IsInCombat())
+            return PanelVisibilityKind.Hide;
+        return PanelVisibilityKind.Show;
     }
 
-    private static PanelVisibilityKind GetAlertVisibility(Alert alert, DefaultPanelVisibility defaultVis) {
+    private static PanelVisibilityKind GetAlertVisibility(Alert alert, PanelVisibilityKind globalDefault) {
         if (alert.Jurisdictions.Length != 0) {
             foreach (var juris in alert.Jurisdictions) {
                 if (juris.Enabled && GetJurisdictionVisibility(juris) is { } visibility) {
-                    if (ConditionWatcher.IsInDuty())
-                        return visibility.InDuty ?? defaultVis.InDuty;
-                    return visibility.Default ?? defaultVis.Default;
+                    if (visibility.InDuty is { } inDuty && ConditionWatcher.IsInDuty())
+                        return inDuty;
+                    if (visibility.InCombat is { } inCombat && ConditionWatcher.IsInCombat())
+                        return inCombat;
+                    if (visibility.Default is { } jurisDefault)
+                        return jurisDefault;
+                    return globalDefault;
                 }
             }
         }
 
-        if (ConditionWatcher.IsInDuty())
-            return defaultVis.InDuty;
-        return defaultVis.Default;
+        return globalDefault;
     }
 
     public static PanelVisibility? GetJurisdictionVisibility(Jurisdiction juris) {
@@ -379,10 +382,5 @@ public class OverlayUpdater {
         Skip,
         ForceRedraw,
         RedrawIfChanged,
-    }
-
-    private ref struct DefaultPanelVisibility {
-        public PanelVisibilityKind Default;
-        public PanelVisibilityKind InDuty;
     }
 }

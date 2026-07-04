@@ -5,6 +5,7 @@ namespace CurrencyWatchdog.Watcher;
 
 public sealed class ConditionWatcher : IDisposable {
     private const ConditionFlag DutyFlag = ConditionFlag.BoundByDuty56;
+    private const ConditionFlag CombatFlag = ConditionFlag.InCombat;
 
     public event Action? OnChange;
 
@@ -18,8 +19,10 @@ public sealed class ConditionWatcher : IDisposable {
 
     public static bool IsInDuty() => Service.Condition[DutyFlag];
 
+    public static bool IsInCombat() => Service.Condition[CombatFlag];
+
     private void OnConditionChange(ConditionFlag flag, bool value) {
-        if (flag == DutyFlag)
+        if (flag is DutyFlag or CombatFlag)
             Notify();
     }
 
