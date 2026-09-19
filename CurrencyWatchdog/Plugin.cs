@@ -4,10 +4,12 @@ using CurrencyWatchdog.Native;
 using CurrencyWatchdog.Utility;
 using Dalamud.Plugin;
 using KamiToolKit;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CurrencyWatchdog;
 
-public sealed class Plugin : IDalamudPlugin {
+public sealed class Plugin : IAsyncDalamudPlugin {
     public const string Name = "Currency Watchdog";
 
     public static ConfigManager ConfigManager { get; private set; } = null!;
@@ -20,7 +22,10 @@ public sealed class Plugin : IDalamudPlugin {
 
     public Plugin(IDalamudPluginInterface pluginInterface) {
         pluginInterface.Create<Service>();
-        KamiToolKitLibrary.Initialize(pluginInterface);
+    }
+
+    public async Task LoadAsync(CancellationToken cancellationToken) {
+        await KamiToolKitLibrary.InitializeAsync(Service.PluginInterface);
 
         ConfigManager = new ConfigManager();
 
@@ -31,18 +36,23 @@ public sealed class Plugin : IDalamudPlugin {
         Evaluator = new Evaluator();
         AlertUpdater = new AlertUpdater(Evaluator);
 
-        Service.Framework.RunOnFrameworkThread(() => {
+        await Service.Framework.Run(() => {
             Overlay.FrameworkThreadInit();
             ConfigManager.Load();
 
             Debugging.PostInit();
+        }, cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync() {
+        WindowManager.Dispose();
+        AlertUpdater.Dispose();
+
+        await Service.Framework.Run(async () => {
+            Overlay.Dispose();
+
+            await KamiToolKitLibrary.DisposeAsync();
         });
     }
 
-    public void Dispose() {
-        WindowManager.Dispose();
-        AlertUpdater.Dispose();
-        Overlay.Dispose();
-        KamiToolKitLibrary.Dispose();
-    }
 }
