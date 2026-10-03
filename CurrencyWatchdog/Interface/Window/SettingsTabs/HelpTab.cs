@@ -52,7 +52,7 @@ public class HelpTab {
                               "(or group of zones) which overrides this behavior and shows overlay panels in that duty.");
 
             ImGui.TextWrapped("Jurisdictions are an advanced feature, and can be added to a burden under the \"Advanced\" heading section. Once created, " +
-                              "multiple jurisdictions can be defined. If you delete all jurisdictions from a burden, the section not appear.");
+                              "multiple jurisdictions can be defined. If you delete all jurisdictions from a burden, the section will not appear.");
 
             ImGui.TextWrapped("Similar to rules, jurisdictions are evaluated from the top down, and the first jurisdiction that matches will be used. " +
                               "This first active jurisdiction will be highlighted in green. Other matching (but inactive) jurisdictions will be highlighted " +
